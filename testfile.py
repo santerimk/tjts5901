@@ -1,11 +1,14 @@
 # A simple function to test
 def add(a, b):
+    """add"""
     return a + b
 
 def subtract(a, b):
+    """subs"""
     return a - b
 
 def multiply(a, b):
+    """mult"""
     return a * b
 
 # Test cases for the functions
@@ -13,6 +16,7 @@ def test_add():
     assert add(2, 3) == 5
     assert add(-1, 1) == 0
     assert add(-1, -1) == -2
+
 
 def test_subtract():
     assert subtract(10, 5) == 5
