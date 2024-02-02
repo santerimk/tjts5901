@@ -4,8 +4,9 @@ name: Test On Merge to Main
 on:
   pull_request:
     types: [closed]
-    branches:
+    branches-ignore:
       - main
+      - test
 jobs:
   run-tests:
     if: github.event.pull_request.merged == true
