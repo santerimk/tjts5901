@@ -1,32 +1,30 @@
-DROP TABLE IF EXISTS trader;
-DROP TABLE IF EXISTS stock;
+DROP TABLE IF EXISTS traders;
+DROP TABLE IF EXISTS stocks;
 DROP TABLE IF EXISTS orders;
 
-CREATE TABLE trader (
-    traderid INTEGER PRIMARY KEY NOT NULL,
-    tname CHAR(50) NOT NULL,
+CREATE TABLE traders (
+    traderid INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name CHAR(50) NOT NULL,
+    last_name CHAR(50) NOT NULL,
+    tradername CHAR(50) NOT NULL UNIQUE,
     hashword TEXT NOT NULL
 );
 
-CREATE TABLE stock (
-    stockid INTEGER PRIMARY KEY NOT NULL,
-    sname CHAR(50) NOT NULL,
-    last_traded_price DECIMAL,
-    last_checked DATETIME
+CREATE TABLE stocks (
+    stockid INTEGER PRIMARY KEY AUTOINCREMENT,
+    stockname CHAR(50) NOT NULL,
+    last_traded_price REAL,
+    last_checked TEXT
 );
 
 CREATE TABLE orders (
-    ordersid INTEGER PRIMARY KEY NOT NULL,
+    orderid INTEGER PRIMARY KEY AUTOINCREMENT,
     traderid INTEGER NOT NULL,
     stockid INTEGER NOT NULL,
-    odate DATETIME NOT NULL,
+    order_date TEXT NOT NULL,
     quantity INTEGER NOT NULL,
-    selling BOOLEAN NOT NULL,
-    offer DECIMAL NOT NULL,
-    CONSTRAINT orders_traderid
-        FOREIGN KEY (traderid) 
-        REFERENCES trader(traderid),
-    CONSTRAINT orders_stockid
-        FOREIGN KEY (stockid)
-        REFERENCES stock(stockid)
+    selling INTEGER NOT NULL,
+    offer REAL NOT NULL,
+    FOREIGN KEY (traderid) REFERENCES traders(traderid),
+    FOREIGN KEY (stockid) REFERENCES stocks(stockid)
 );

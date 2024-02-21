@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Main</title>
+		<link
+			rel="stylesheet"
+			href="{{ url_for('static', filename='styles.css') }}"
+		/>
+	</head>
+	<body>
+		<!-- Add navigation bar to the page. -->
+		{% include 'navbar.html' %}
+
+		<!-- Add some placeholder info. -->
+		<h1>Trader Profile</h1>
+		<div>
+			<h2>Welcome, {{ trader.first_name }} {{ trader.last_name }}!</h2>
+			<p>Your trader account is: "{{ trader.tradername }}"</p>
+		</div>
+	</body>
+</html>
