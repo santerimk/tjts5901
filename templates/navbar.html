@@ -3,13 +3,21 @@
 	<nav class="navbartop">
 		<ul>
 			<div class="navgroup-left">
-				<!-- Offer page. -->
+				<!-- Dashboard. -->
 				<li class="navobj">
-					<a href="{{url_for('make_an_offer')}}">Offer</a>
+					<a href="{{url_for('dashboard')}}">Dashboard</a>
 				</li>
-				<!-- Bidding page. -->
+				<!-- Offer List. -->
 				<li class="navobj">
-					<a href="{{url_for('bid_on_an_offer')}}">Bidding</a>
+					<a href="{{url_for('offer_listing')}}">Offers</a>
+				</li>
+				<!-- Bid List. -->
+				<li class="navobj">
+					<a href="{{url_for('bid_listing')}}">Bids</a>
+				</li>
+				<!-- Order List. -->
+				<li class="navobj">
+					<a href="{{url_for('order_listing')}}">Orders</a>
 				</li>
 			</div>
 			<div class="navgroup-right">

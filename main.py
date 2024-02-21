@@ -9,7 +9,6 @@ app = Flask(__name__)
 app.secret_key = '!secret'
 csrf = CSRFProtect(app) # Add CSRF-protection (Cross-site request forgery) to the Flask-app.
 
-db.initialize()
 db.test_populate() # TODO: Remove once done with testing the database.
 
 if __name__ == '__main__':
@@ -35,7 +34,7 @@ def auth_required(f):
 def index():
     """Redirects the user to the front page.
     """
-    return redirect(url_for('main_page'))
+    return redirect(url_for('dashboard'))
 
 
 @app.route('/registry', methods=['GET'])
@@ -82,7 +81,7 @@ def auth():
     tradername = form.tradername.data.strip()
     trader = get_trader(tradername)
     session['trader'] = trader
-    return redirect('main_page')
+    return redirect(url_for('dashboard'))
 
 
 @app.route('/logout', methods=['GET'])
@@ -93,30 +92,39 @@ def logout():
     return redirect('/')
 
 
-@app.route('/main_page')
+@app.route('/dashboard')
 @auth_required
-def main_page():
+def dashboard():
     """Creates the main page.
     """
-    return render_template('main_page.html', trader=session['trader'])
+    return render_template('dashboard.html', trader=session['trader'])
 
 
-@app.route('/make_an_offer')
+@app.route('/offer_listing')
 @auth_required
-def make_an_offer():
-    """Creates an offer form and displays it on a page.
+def offer_listing():
+    """Lists all available offers.
     """
     # TODO: Add offer logic.
     return "Offers page."
 
 
-@app.route('/bid_on_an_offer')
+@app.route('/bid_listing')
 @auth_required
-def bid_on_an_offer():
-    """Creates a bidding form and displays it on a page.
+def bid_listing():
+    """Lists all available bids.
     """
     # TODO: Add bidding logic.
     return "Bidding page."
+
+
+@app.route('/order_listing')
+@auth_required
+def order_listing():
+    """Lists all available orders.
+    """
+    # TODO: Add bidding logic.
+    return "Order page."
 
 
 @app.route('/orders')

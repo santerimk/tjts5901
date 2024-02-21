@@ -3,6 +3,12 @@ from datetime import datetime
 
 DATABASE_NAME = "stockmarket.db"
 
+
+def get_connection():
+    """For creating and returning database connections.
+    """
+    return sqlite3.connect(DATABASE_NAME)
+
 def initialize():
     """For initializing the database.
     """
@@ -13,15 +19,20 @@ def initialize():
     conn.close()
 
 
-def get_connection():
-    """For creating and returning database connections.
-    """
-    return sqlite3.connect(DATABASE_NAME)
+# !!!USE ONLY IF YOU NEED TO RESET THE DATABASE TABLES AND REMOVE DATA!!!
+# def reset():
+#     """For resetting the database, dropping all tables and their data, recreating them."""
+#     conn = get_connection()
+#     with open('reset.sql', mode='r') as file:
+#         conn.executescript(file.read())
+#     conn.commit()
+#     conn.close()
 
 
 def query(query, args=(), one=False):
     """For database queries, returning query results as rows.
     """
+    initialize() # Makes sure database is initialized.
     conn = get_connection()
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
@@ -39,6 +50,7 @@ def query(query, args=(), one=False):
 def modify(query, args=()):
     """For database functions of insert, update and delete.
     """
+    initialize() # Makes sure database is initialized.
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(query, args)
@@ -48,6 +60,7 @@ def modify(query, args=()):
 
 
 def test_populate():
+    initialize() # Makes sure database is initialized.
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     # Insert a trader
     modify("INSERT INTO traders (first_name, last_name, tradername, hashword) VALUES (?, ?, ?, ?)",
