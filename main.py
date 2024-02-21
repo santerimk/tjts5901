@@ -9,6 +9,7 @@ app = Flask(__name__)
 app.secret_key = '!secret'
 csrf = CSRFProtect(app) # Add CSRF-protection (Cross-site request forgery) to the Flask-app.
 
+db.reset() # TODO: Remove once done with testing the database.
 db.test_populate() # TODO: Remove once done with testing the database.
 
 if __name__ == '__main__':
@@ -92,42 +93,39 @@ def logout():
     return redirect('/')
 
 
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['GET'])
 @auth_required
 def dashboard():
-    """Creates the main page.
+    """Shows the trader dashboard.
     """
     return render_template('dashboard.html', trader=session['trader'])
 
 
-@app.route('/offer_listing')
+@app.route('/offer_listing', methods=['GET'])
 @auth_required
 def offer_listing():
     """Lists all available offers.
     """
-    # TODO: Add offer logic.
-    return "Offers page."
+    stocks = get_stocks()
+    for stock in stocks:
+        offers = get_stock_offers(stock['stockid'])
+        stock['offers'] = offers
+    return render_template('offer_listing.html', stocks=stocks)
 
 
-@app.route('/bid_listing')
+@app.route('/bid_listing', methods=['GET'])
 @auth_required
 def bid_listing():
     """Lists all available bids.
     """
-    # TODO: Add bidding logic.
-    return "Bidding page."
+    stocks = get_stocks()
+    for stock in stocks:
+        bids = get_stock_bids(stock['stockid'])
+        stock['bids'] = bids
+    return render_template('bid_listing.html', stocks=stocks)
 
 
-@app.route('/order_listing')
-@auth_required
-def order_listing():
-    """Lists all available orders.
-    """
-    # TODO: Add bidding logic.
-    return "Order page."
-
-
-@app.route('/orders')
+@app.route('/orders', methods=['GET'])
 @auth_required
 def orders():
     orders_query = 'SELECT * FROM orders'
@@ -150,3 +148,21 @@ def get_trader(tradername):
 
 def add_trader(first_name, last_name, tradername, hashword):
     db.modify("INSERT INTO traders (first_name, last_name, tradername, hashword) VALUES (?, ?, ?, ?)", (first_name, last_name, tradername, hashword))
+
+
+def get_stocks():
+    stocks_query = "SELECT * FROM stocks"
+    stocks = db.query(stocks_query)
+    return stocks
+
+
+def get_stock_offers(stockid):
+    # Fetch orders where `selling` is 1 for the current stock
+    offers = db.query("SELECT * FROM orders WHERE stockid = ? AND selling = 1", (stockid,))
+    return offers
+
+
+def get_stock_bids(stockid):
+    # Fetch orders where `selling` is 1 for the current stock
+    bids = db.query("SELECT * FROM orders WHERE stockid = ? AND selling = 0", (stockid,))
+    return bids

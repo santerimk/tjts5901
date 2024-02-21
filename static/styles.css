@@ -115,3 +115,21 @@ body {
 	right: -100%;
 	width: 30em;
 }
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+table,
+th,
+td {
+	border: 1px solid black;
+}
+th,
+td {
+	padding: 8px;
+	text-align: left;
+}
+.stock-header {
+	background-color: #f2f2f2;
+}

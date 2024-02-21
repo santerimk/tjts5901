@@ -24,7 +24,7 @@ CREATE TABLE orders (
     order_date TEXT NOT NULL,
     quantity INTEGER NOT NULL,
     selling INTEGER NOT NULL,
-    offer REAL NOT NULL,
+    price REAL NOT NULL,
     FOREIGN KEY (traderid) REFERENCES traders(traderid),
     FOREIGN KEY (stockid) REFERENCES stocks(stockid)
 );

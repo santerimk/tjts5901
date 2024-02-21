@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Stock Offers</title>
+		<link
+			rel="stylesheet"
+			href="{{ url_for('static', filename='styles.css') }}"
+		/>
+	</head>
+	<body>
+		<!-- Add navigation bar to the page. -->
+		{% include 'navbar.html' %}
+
+		<!-- Offers table. -->
+		<table>
+			<thead>
+				<tr>
+					<th>Stock Name</th>
+					<th>Last Traded Price</th>
+					<th>Last Checked</th>
+					<th>Order Type</th>
+					<th>Order Date</th>
+					<th>Quantity</th>
+					<th>Price</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for stock in stocks_with_offers %}
+				<!-- Stock Header Row -->
+				<tr class="stock-header">
+					<td>{{ stock.stockname }}</td>
+					<td>{{ stock.last_traded_price }}</td>
+					<td>{{ stock.last_checked }}</td>
+					<td colspan="4"></td>
+				</tr>
+				<!-- Orders for the Stock -->
+				{% for order in stock.offers %}
+				<tr>
+					<td colspan="3"></td>
+					<!-- Align with stock header row -->
+					<td>{{ 'Bid' if order.selling else 'Offer' }}</td>
+					<td>{{ order.order_date }}</td>
+					<td>{{ order.quantity }}</td>
+					<td>{{ order.price }}</td>
+				</tr>
+				{% else %}
+				<tr>
+					<td colspan="7">No orders available</td>
+				</tr>
+				{% endfor %} {% endfor %}
+			</tbody>
+		</table>
+	</body>
+</html>
