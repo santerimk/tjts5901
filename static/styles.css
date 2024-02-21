@@ -48,7 +48,7 @@ body {
 
 #login_background {
 	/* Setting background color for login pages. */
-	background: #c3ebff;
+	background: lightyellow;
 }
 #login_field {
 	/* Design and positioning for login field. */
@@ -70,6 +70,7 @@ body {
 	margin-left: auto;
 	margin-right: auto;
 	width: 90%;
+	position: relative;
 }
 .input_label {
 	/* Input field labels above inputs. */
@@ -97,39 +98,134 @@ body {
 	font-size: 1.1em;
 }
 .info {
-	/* Color general info messages. */
+	/* Colors general info messages. */
 	color: green;
 	font-size: 0.8em;
 }
 .error1 {
-	/* Color general error messages. */
+	/* Colors general error messages. */
 	color: red;
 }
 .error2 {
-	/* Color and position the input field error messages. */
+	/* Colors and positions the input field error messages. */
 	color: red;
 	position: absolute;
 	text-align: left;
-	left: 27em;
+	left: 22.5em;
 	margin-left: 0.5em;
 	right: -100%;
 	width: 30em;
 }
 
-table {
-	width: 100%;
-	border-collapse: collapse;
+#stock-listing {
+	/* Design for stock lists. */
+	list-style-type: none;
+	padding: 0;
+	margin: 0.5em;
 }
-table,
-th,
-td {
-	border: 1px solid black;
-}
-th,
-td {
-	padding: 8px;
+
+#stock-listing > li {
+	/* Positioning for stock list elements. */
+	margin: 2em 0;
 	text-align: left;
 }
-.stock-header {
-	background-color: #f2f2f2;
+
+.order-listing {
+	/* Design for order tables. */
+	table-layout: fixed;
+	width: 100%;
+	border: 1px solid black;
+	border-collapse: collapse;
+	margin-top: 0.5em;
+}
+
+.order-listing th,
+.order-listing td {
+	/* Design for order columns. */
+	border: 1px solid #888;
+	padding: 0.2em;
+}
+
+.order-listing tr {
+	/* Design for order rows. */
+	width: 100%;
+	text-align: left;
+}
+
+.heavy {
+	/* Heavy text design. */
+	font-size: 1.3em;
+	font-weight: bold;
+	margin-right: 0.4em;
+	margin-left: 0.1em;
+}
+
+.custom-fieldset {
+	/* Custom design for fieldsets. */
+	width: 20em;
+	border: black 1px solid;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 2em;
+	padding-right: 2em;
+	padding-top: 2em;
+	padding-bottom: 1em;
+}
+
+.input-row {
+	/* Positioning and design for input rows. */
+	margin-top: 0.2em;
+	margin-bottom: 0.2em;
+	float: left;
+	clear: both;
+	position: relative;
+	width: 100%;
+}
+
+.input-label {
+	/* Positioning of input field labels. */
+	float: left;
+	font-weight: bold;
+}
+
+.input-field {
+	/* Positioning of generic input fields. */
+	float: right;
+	clear: right;
+}
+
+.numeric-input-field {
+	/* Positioning of numeric input fields. */
+	float: right;
+	clear: right;
+	width: 10em;
+}
+
+.radio-input-field {
+	/* Positioning and design for radio button lists. */
+	margin: 0;
+	float: right;
+	clear: right;
+	list-style: None;
+}
+
+.radio-input-field li {
+	/* Design for radiobutton labels. */
+	text-align: right;
+}
+
+.radio-input-field input {
+	/* Positioning for radio button checkboxes. */
+	float: right;
+	clear: right;
+}
+
+.submit {
+	/* Positioning and design for submit buttons. */
+	margin-left: auto;
+	margin-right: auto;
+	background: #0096f0;
+	color: White;
+	margin-top: 1em;
+	padding: 0.25em 0.9em 0.25em 0.9em;
 }

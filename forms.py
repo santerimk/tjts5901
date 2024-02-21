@@ -1,7 +1,8 @@
-from wtforms import StringField, PasswordField, SubmitField, validators, ValidationError
+from wtforms import StringField, PasswordField, SubmitField, ValidationError, RadioField, IntegerField, DecimalField, HiddenField
+from wtforms.validators import InputRequired
 from polyglot import PolyglotForm
 import stockmarket as db
-from tools import verify_password, hash_password
+from tools import verify_password
 
 
 
@@ -79,3 +80,35 @@ class LoginForm(PolyglotForm):
     tradername = StringField("Tradername", validators=[check_if_exists])
     password = PasswordField("Password", validators=[verify])
     login = SubmitField("Login")
+
+
+
+class StockOrderForm(PolyglotForm):
+    """Class for creating stock orders.
+    """    
+    def check_price(self, field):
+        if not field.data:
+            raise ValidationError(f"Price is required.")
+        try:
+            value = float(field.data)
+            if value <= 0:
+                raise ValidationError("Price must be greater than 0.")
+        except ValueError:
+            raise ValidationError("Price must be a decimal number.")
+
+    def check_quantity(self, field):
+        if not field.data:
+            raise ValidationError("Quantity is required.")
+        try:
+            value = int(field.data)
+            if value <= 0:
+                raise ValidationError("Quantity must be greater than 0.")
+        except ValueError:
+            raise ValidationError("Quantity must be a whole number.")
+
+    type = RadioField("Order Type", choices=["Bid", "Offer"], default="Bid", validators=[InputRequired()])
+    price = DecimalField("Price (€)", default=1.00, validators=[check_price])
+    quantity = IntegerField("Quantity (pcs)", default=1, validators=[check_quantity])
+    order = SubmitField("Place Order")
+    cancel = SubmitField("Cancel")
+    hidden = HiddenField()

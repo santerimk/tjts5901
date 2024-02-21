@@ -13,6 +13,16 @@
 		<!-- Add navigation bar to the page. -->
 		{% include 'navbar.html' %}
 
+		<!-- Display possible info messages. -->
+		{% for message in get_flashed_messages(category_filter=['info']) %}
+		<div class="info">{{message}}</div>
+		{% endfor %}
+
+		<!-- Display possible error messages. -->
+		{% for message in get_flashed_messages(category_filter=['error']) %}
+		<div class="error1">{{message}}</div>
+		{% endfor %}
+
 		<!-- Add some placeholder info. -->
 		<h1>Trader Profile</h1>
 		<div>

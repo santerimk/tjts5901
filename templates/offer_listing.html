@@ -13,44 +13,84 @@
 		<!-- Add navigation bar to the page. -->
 		{% include 'navbar.html' %}
 
-		<!-- Offers table. -->
-		<table>
-			<thead>
-				<tr>
-					<th>Stock Name</th>
-					<th>Last Traded Price</th>
-					<th>Last Checked</th>
-					<th>Order Type</th>
-					<th>Order Date</th>
-					<th>Quantity</th>
-					<th>Price</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for stock in stocks_with_offers %}
-				<!-- Stock Header Row -->
-				<tr class="stock-header">
-					<td>{{ stock.stockname }}</td>
-					<td>{{ stock.last_traded_price }}</td>
-					<td>{{ stock.last_checked }}</td>
-					<td colspan="4"></td>
-				</tr>
-				<!-- Orders for the Stock -->
-				{% for order in stock.offers %}
-				<tr>
-					<td colspan="3"></td>
-					<!-- Align with stock header row -->
-					<td>{{ 'Bid' if order.selling else 'Offer' }}</td>
-					<td>{{ order.order_date }}</td>
-					<td>{{ order.quantity }}</td>
-					<td>{{ order.price }}</td>
-				</tr>
-				{% else %}
-				<tr>
-					<td colspan="7">No orders available</td>
-				</tr>
-				{% endfor %} {% endfor %}
-			</tbody>
-		</table>
+		<h1>Stock Offers</h1>
+
+		<!-- Offers information. -->
+		{% if offer_hierarchy %}
+		<ul id="stock-listing">
+			{% for stock in offer_hierarchy %}
+			<li>
+				<span class="heavy">{{ stock['stockname'] }}</span>
+				<span>
+					(Last traded price: {{ stock['last_traded_price'] }} €)
+				</span>
+				<table class="order-listing">
+					<tr>
+						<th>Seller</th>
+						<th>Price (€)</th>
+						<th>Quantity (pcs)</th>
+						<th>Order Date</th>
+					</tr>
+					{% for offer in stock['offers'] %}
+					<tr>
+						<td>{{ offer['seller']['tradername'] }}</td>
+						<td>{{ offer['price'] }}</td>
+						<td>{{ offer['quantity'] }}</td>
+						<td>{{ offer['order_date'] }}</td>
+					</tr>
+					{% else %}
+					<tr>
+						<td colspan="3">No offers available.</td>
+					</tr>
+					{% endfor %}
+				</table>
+			</li>
+			{% endfor %}
+		</ul>
+		{% else %}
+		<span>No stocks available.</span>
+		{% endif %}
+
+		<!-- {% for stock in stocks %}
+        <button class="accordion">{{ stock.stockname }} - Last Traded Price: {{ stock.last_traded_price }}</button>
+        <div class="panel">
+            <p>Last Checked: {{ stock.last_checked }}</p>
+            <table>
+                <tr>
+                    <th>Order Date</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                </tr>
+                {% for order in stock.offers %}
+                <tr class="order-row">
+                    <td>{{ order.order_date }}</td>
+                    <td>{{ order.quantity }}</td>
+                    <td>{{ order.price }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3">No orders available</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% endfor %}
+
+        <script>
+            var acc = document.getElementsByClassName("accordion");
+            var i;
+
+            for (i = 0; i < acc.length; i++) {
+                acc[i].addEventListener("click", function() {
+                    this.classList.toggle("active");
+                    var panel = this.nextElementSibling;
+                    if (panel.style.display === "block") {
+                        panel.style.display = "none";
+                    } else {
+                        panel.style.display = "block";
+                    }
+                });
+            }
+        </script> -->
 	</body>
 </html>
