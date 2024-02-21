@@ -101,6 +101,24 @@ def main_page():
     return render_template('main_page.html', trader=session['trader'])
 
 
+@app.route('/make_an_offer')
+@auth_required
+def make_an_offer():
+    """Creates an offer form and displays it on a page.
+    """
+    # TODO: Add offer logic.
+    return "Offers page."
+
+
+@app.route('/bid_on_an_offer')
+@auth_required
+def bid_on_an_offer():
+    """Creates a bidding form and displays it on a page.
+    """
+    # TODO: Add bidding logic.
+    return "Bidding page."
+
+
 @app.route('/orders')
 @auth_required
 def orders():
