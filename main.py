@@ -124,6 +124,15 @@ def bid_listing():
     return render_template('bid_listing.html', bid_hierarchy=bid_hierarchy)
 
 
+@app.route('/trade_listing', methods=['GET'])
+@auth_required
+def trade_listing():
+    """Lists all available trades.
+    """
+    trade_hierarchy = build_trade_hierarchy()
+    return render_template('trade_listing.html', trade_hierarchy=trade_hierarchy)
+
+
 @app.route('/order_create', methods=['GET'])
 def order_create():
     """Creates a stock ordering form.

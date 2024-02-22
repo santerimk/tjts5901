@@ -18,6 +18,8 @@ def hash_password(password):
 
 def build_owned_stock_offers(traderid):
     stocks = get_stocks()
+    if not stocks:
+        stocks = []
     for stock in stocks:
         offers = get_stock_offers_of_trader(stock['stockid'], traderid)
         if offers:
@@ -28,6 +30,8 @@ def build_owned_stock_offers(traderid):
 
 def build_owned_stock_bids(traderid):
     stocks = get_stocks()
+    if not stocks:
+        stocks = []
     for stock in stocks:
         bids = get_stock_bids_of_trader(stock['stockid'], traderid)
         if bids:
@@ -38,6 +42,8 @@ def build_owned_stock_bids(traderid):
 
 def build_offer_hierarchy():
     stocks = get_stocks()
+    if not stocks:
+        stocks = []
     for stock in stocks:
         offers = get_stock_offers(stock['stockid'])
         for offer in offers:
@@ -49,6 +55,8 @@ def build_offer_hierarchy():
 
 def build_bid_hierarchy():
     stocks = get_stocks()
+    if not stocks:
+        stocks = []
     for stock in stocks:
         bids = get_stock_bids(stock['stockid'])
         for bid in bids:
@@ -56,6 +64,16 @@ def build_bid_hierarchy():
             bid['buyer'] = get_trader_info(traderid)
         stock['bids'] = bids
     return stocks
+
+
+def build_trade_hierarchy():
+    trades = get_trades()
+    if not trades:
+        trades = []
+    for trade in trades:
+        stock = get_stock(trade['stockid'])
+        trade['stockname'] = stock['stockname']
+    return trades
 
 
 def get_trader(tradername):
@@ -72,8 +90,7 @@ def add_order(traderid, stockid, order_date, quantity, selling, price):
 
 
 def get_stocks():
-    stocks_query = "SELECT * FROM stocks ORDER BY stockname ASC"
-    stocks = db.query(stocks_query)
+    stocks = db.query("SELECT * FROM stocks ORDER BY stockname ASC")
     return stocks
 
 
@@ -122,3 +139,8 @@ def get_stock_bids_of_trader(stockid, traderid):
 def get_trader_info(traderid):
     trader_info = db.query("SELECT traderid, tradername FROM traders WHERE traderid = ?", (traderid,), True)
     return trader_info
+
+
+def get_trades():
+    trades = db.query("SELECT * FROM trades ORDER BY trade_date DESC")
+    return trades

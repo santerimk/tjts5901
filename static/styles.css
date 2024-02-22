@@ -164,7 +164,7 @@ body {
 	text-align: left;
 }
 
-.order-listing {
+.item-listing {
 	/* Design for order tables. */
 	table-layout: fixed;
 	width: 100%;
@@ -173,14 +173,14 @@ body {
 	margin-top: 0.5em;
 }
 
-.order-listing th,
-.order-listing td {
+.item-listing th,
+.item-listing td {
 	/* Design for order columns. */
 	border: 1px solid #888;
 	padding: 0.2em;
 }
 
-.order-listing tr {
+.item-listing tr {
 	/* Design for order rows. */
 	width: 100%;
 	text-align: left;

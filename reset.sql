@@ -30,9 +30,11 @@ CREATE TABLE orders (
     FOREIGN KEY (stockid) REFERENCES stocks(stockid)
 );
 
-CREATE TABLE trades (
+CREATE TABLE IF NOT EXISTS trades (
     tradeid INTEGER PRIMARY KEY AUTOINCREMENT,
+    stockid INTEGER NOT NULL,
     trade_date TEXT NOT NULL,
     price REAL NOT NULL,
-    quantity INTEGER NOT NULL
+    quantity INTEGER NOT NULL,
+    FOREIGN KEY (stockid) REFERENCES stocks(stockid)
 );
