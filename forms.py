@@ -94,7 +94,7 @@ class CreateOrderForm(PolyglotForm):
             raise ValidationError("Price must be greater than 0.")
         if not float(value * 100).is_integer():
             raise ValidationError("Price must not have more than 2 decimal places.")  
-        stockid = int(self.hidden1.data)
+        stockid = int(self.hidden.data)
         stock = get_stock(stockid)
         last_traded_price = stock['last_traded_price']
         print(type(last_traded_price))

@@ -55,9 +55,13 @@ def modify(query, args=()):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(query, args)
+    id = None
+    if 'INSERT' in query:
+        id = cur.lastrowid
     conn.commit()
     cur.close()
     conn.close()
+    return id
 
 
 def test_populate():

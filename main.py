@@ -145,8 +145,9 @@ def order_create():
         redirect(url_for('dashboard'))
     stock = get_stock(stockid)
     form = CreateOrderForm()
-    form.type.data = order_type
     form.hidden.data = stockid
+    form.type.data = order_type
+    form.price.data = stock['last_traded_price']
     return render_template('order_create.html', form=form, stock=stock)
     
 
@@ -167,9 +168,12 @@ def order_place():
     quantity = int(form.quantity.data)
     selling = form.type.data == 'Offer'
     price = float(form.price.data)
-    add_order(traderid, stockid, order_date, quantity, selling, price)
-    flash('New order placed!', 'info')
-    # TODO: Add the logic of checking and possibly completing transactions between matching bids and offers.
+    orderid = add_order(traderid, stockid, order_date, quantity, selling, price)
+    trade_made = run_order_matching(orderid)
+    if trade_made:
+        flash('Trade was made!', 'info')
+    else:
+        flash('New order was placed!', 'info')
     return redirect(url_for('dashboard'))
 
 
@@ -216,8 +220,11 @@ def order_update():
     selling = form.type.data == 'Offer'
     price = float(form.price.data)
     update_order(orderid, order_date, quantity, selling, price)
-    flash('Order was modified!', 'info')
-    # TODO: Add the logic of checking and possibly completing transactions between matching bids and offers.
+    trade_made = run_order_matching(orderid)
+    if trade_made:
+        flash('Trade was made!', 'info')
+    else:
+        flash('Order was modified!', 'info')
     return redirect(url_for('dashboard'))
 
 

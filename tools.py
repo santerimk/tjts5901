@@ -1,4 +1,5 @@
 from passlib.hash import bcrypt
+from datetime import datetime
 import stockmarket as db
 
 
@@ -76,31 +77,113 @@ def build_trade_hierarchy():
     return trades
 
 
+def run_order_matching(orderid):
+    """Matches the given order with existing orders.
+    Create trades and update or remove orders accordingly.
+    """
+    order = get_order(orderid)
+    if order['selling']:
+        matching_orders = get_matching_bids(order['stockid'], order['traderid'], order['price'])
+    else:
+        matching_orders = get_matching_offers(order['stockid'], order['traderid'], order['price'])
+
+    for match in matching_orders:
+        trade_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        traded_price = max(order['price'], match['price'])
+        traded_quantity = min(order['quantity'], match['quantity'])
+        add_trade(order['stockid'], trade_date, traded_price, traded_quantity)
+        match_new_quantity = match['quantity'] - traded_quantity
+        order_new_quantity = order['quantity'] - traded_quantity
+        if 0 < match_new_quantity:
+            update_order(match['orderid'], match['order_date'], match_new_quantity, match['selling'], match['price'])
+        else:
+            delete_order(match['orderid'])
+        if 0 < order_new_quantity:
+            update_order(order['orderid'], order['order_date'], order_new_quantity, order['selling'], order['price'])
+        else:
+            delete_order(order['orderid'])
+            break
+
+    return matching_orders != None
+
+
+def get_matching_bids(stockid, traderid, offering_price):
+    """Retrieves bids for the stock with a bidding price of
+    at least equal to the offering price.
+    """
+    matching_bids = db.query("""
+        SELECT * FROM orders
+        WHERE stockid = ? AND selling = 0 AND price >= ? AND traderid != ?
+        ORDER BY price DESC, order_date ASC
+        """, (stockid, offering_price, traderid))
+    return matching_bids
+
+
+def get_matching_offers(stockid, traderid, bidding_price):
+    """Retrieves offers for the stock with an offering price of
+    at most equal to the bidding price.
+    """
+    matching_offers = db.query("""
+        SELECT * FROM orders
+        WHERE stockid = ? AND selling = 1 AND price <= ? AND traderid != ?
+        ORDER BY price ASC, order_date ASC
+        """, (stockid, bidding_price, traderid))
+    return matching_offers
+
+
 def get_trader(tradername):
-    trader = db.query("SELECT traderid, first_name, last_name, tradername FROM traders WHERE tradername = ?", (tradername,), True)
+    trader = db.query("""
+        SELECT traderid, first_name, last_name, tradername FROM traders
+        WHERE tradername = ?
+        """, (tradername,), True)
     return trader
 
 
 def add_trader(first_name, last_name, tradername, hashword):
-    db.modify("INSERT INTO traders (first_name, last_name, tradername, hashword) VALUES (?, ?, ?, ?)", (first_name, last_name, tradername, hashword))
+    traderid = db.modify("""
+        INSERT INTO traders (first_name, last_name, tradername, hashword)
+        VALUES (?, ?, ?, ?)
+        """, (first_name, last_name, tradername, hashword))
+    return traderid
 
 
 def add_order(traderid, stockid, order_date, quantity, selling, price):
-    db.modify("INSERT INTO orders (traderid, stockid, order_date, quantity, selling, price) VALUES (?, ?, ?, ?, ?, ?)", (traderid, stockid, order_date, quantity, selling, price))
+    orderid = db.modify("""
+        INSERT INTO orders (traderid, stockid, order_date, quantity, selling, price)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, (traderid, stockid, order_date, quantity, selling, price))
+    return orderid
+
+
+def add_trade(stockid, trade_date, price, quantity):
+    tradeid = db.modify("""
+        INSERT INTO trades (stockid, trade_date, price, quantity)
+        VALUES (?, ?, ?, ?)
+        """, (stockid, trade_date, price, quantity))
+    return tradeid
 
 
 def get_stocks():
-    stocks = db.query("SELECT * FROM stocks ORDER BY stockname ASC")
+    stocks = db.query("""
+        SELECT * FROM stocks
+        ORDER BY stockname ASC
+        """)
     return stocks
 
 
 def get_stock(stockid):
-    stock = db.query("SELECT * FROM stocks WHERE stockid = ?", (stockid,), True)
+    stock = db.query("""
+        SELECT * FROM stocks
+        WHERE stockid = ?
+        """, (stockid,), True)
     return stock
 
 
 def get_order(orderid):
-    order = db.query("SELECT * FROM orders WHERE orderid = ?", (orderid,), True)
+    order = db.query("""
+        SELECT * FROM orders
+        WHERE orderid = ?
+        """, (orderid,), True)
     return order
 
 
@@ -113,34 +196,59 @@ def update_order(orderid, order_date, quantity, selling, price):
 
 
 def delete_order(orderid):
-    db.modify("DELETE FROM orders WHERE orderid = ?", (orderid,))
+    db.modify("""
+        DELETE FROM orders
+        WHERE orderid = ?
+        """, (orderid,))
 
 
 def get_stock_offers(stockid):
-    offers = db.query("SELECT * FROM orders WHERE stockid = ? AND selling = 1 ORDER BY order_date DESC", (stockid,))
+    offers = db.query("""
+        SELECT * FROM orders
+        WHERE stockid = ? AND selling = 1
+        ORDER BY order_date DESC
+        """, (stockid,))
     return offers
 
 
 def get_stock_offers_of_trader(stockid, traderid):
-    offers = db.query("SELECT * FROM orders WHERE stockid = ? AND selling = 1 AND traderid = ? ORDER BY order_date DESC", (stockid, traderid,))
+    offers = db.query("""
+        SELECT * FROM orders
+        WHERE stockid = ? AND selling = 1 AND traderid = ?
+        ORDER BY order_date DESC
+        """, (stockid, traderid,))
     return offers
 
 
 def get_stock_bids(stockid):
-    bids = db.query("SELECT * FROM orders WHERE stockid = ? AND selling = 0 ORDER BY order_date DESC", (stockid,))
+    bids = db.query("""
+        SELECT * FROM orders
+        WHERE stockid = ? AND selling = 0
+        ORDER BY order_date DESC
+        """, (stockid,))
     return bids
 
 
 def get_stock_bids_of_trader(stockid, traderid):
-    offers = db.query("SELECT * FROM orders WHERE stockid = ? AND selling = 0 AND traderid = ? ORDER BY order_date DESC", (stockid, traderid,))
+    offers = db.query("""
+        SELECT * FROM orders
+        WHERE stockid = ? AND selling = 0 AND traderid = ?
+        ORDER BY order_date DESC
+        """, (stockid, traderid,))
     return offers
 
 
 def get_trader_info(traderid):
-    trader_info = db.query("SELECT traderid, tradername FROM traders WHERE traderid = ?", (traderid,), True)
+    trader_info = db.query("""
+        SELECT traderid, tradername FROM traders
+        WHERE traderid = ?
+        """, (traderid,), True)
     return trader_info
 
 
 def get_trades():
-    trades = db.query("SELECT * FROM trades ORDER BY trade_date DESC")
+    trades = db.query("""
+        SELECT * FROM trades
+        ORDER BY trade_date DESC
+        """)
     return trades
