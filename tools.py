@@ -267,6 +267,6 @@ def get_trader_info(traderid):
 def get_trades():
     trades = db.query("""
         SELECT * FROM trades
-        ORDER BY trade_date DESC
+        ORDER BY trade_date ASC
         """)
     return trades
