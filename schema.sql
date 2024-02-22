@@ -24,3 +24,10 @@ CREATE TABLE IF NOT EXISTS orders (
     FOREIGN KEY (traderid) REFERENCES traders(traderid),
     FOREIGN KEY (stockid) REFERENCES stocks(stockid)
 );
+
+CREATE TABLE IF NOT EXISTS trades (
+    tradeid INTEGER PRIMARY KEY AUTOINCREMENT,
+    trade_date TEXT NOT NULL,
+    price REAL NOT NULL,
+    quantity INTEGER NOT NULL
+);

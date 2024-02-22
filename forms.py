@@ -2,7 +2,7 @@ from wtforms import StringField, PasswordField, SubmitField, ValidationError, Ra
 from wtforms.validators import InputRequired
 from polyglot import PolyglotForm
 import stockmarket as db
-from tools import verify_password
+from tools import verify_password, get_stock
 
 
 
@@ -87,24 +87,30 @@ class CreateOrderForm(PolyglotForm):
     """Class for a stock order creation form.
     """    
     def check_price(self, field):
-        if not field.data:
-            raise ValidationError(f"Price is required.")
-        try:
-            value = float(field.data)
-            if value <= 0:
-                raise ValidationError("Price must be greater than 0.")
-        except ValueError:
+        value = field.data
+        if not str(value).replace('-', '', 1).replace(',', '.', 1).replace('.', '', 1).isdigit():
             raise ValidationError("Price must be a decimal number.")
+        if value <= 0:
+            raise ValidationError("Price must be greater than 0.")
+        if not float(value * 100).is_integer():
+            raise ValidationError("Price must not have more than 2 decimal places.")  
+        stockid = int(self.hidden1.data)
+        stock = get_stock(stockid)
+        last_traded_price = stock['last_traded_price']
+        print(type(last_traded_price))
+        min_limit = last_traded_price * 0.9
+        max_limit = last_traded_price * 1.1
+        if not (min_limit <= value <= max_limit):
+            print(type(last_traded_price))
+            raise ValidationError(f"Price must be within 10% of the last traded price.")
 
     def check_quantity(self, field):
-        if not field.data:
-            raise ValidationError("Quantity is required.")
         try:
-            value = int(field.data)
+            value = field.data
             if value <= 0:
                 raise ValidationError("Quantity must be greater than 0.")
-        except ValueError:
-            raise ValidationError("Quantity must be a whole number.")
+        except TypeError:
+            return
 
     type = RadioField("Order Type", choices=["Bid", "Offer"], default="Bid", validators=[InputRequired()])
     price = DecimalField("Price (€)", default=1.00, validators=[check_price])
@@ -119,24 +125,30 @@ class ModifyOrderForm(PolyglotForm):
     """Class for a stock order modification form.
     """    
     def check_price(self, field):
-        if not field.data:
-            raise ValidationError(f"Price is required.")
-        try:
-            value = float(field.data)
-            if value <= 0:
-                raise ValidationError("Price must be greater than 0.")
-        except ValueError:
+        value = field.data
+        if not str(value).replace('-', '', 1).replace(',', '.', 1).replace('.', '', 1).isdigit():
             raise ValidationError("Price must be a decimal number.")
+        if value <= 0:
+            raise ValidationError("Price must be greater than 0.")
+        if not float(value * 100).is_integer():
+            raise ValidationError("Price must not have more than 2 decimal places.")  
+        stockid = int(self.hidden1.data)
+        stock = get_stock(stockid)
+        last_traded_price = stock['last_traded_price']
+        print(type(last_traded_price))
+        min_limit = last_traded_price * 0.9
+        max_limit = last_traded_price * 1.1
+        if not (min_limit <= value <= max_limit):
+            print(type(last_traded_price))
+            raise ValidationError(f"Price must be within 10% of the last traded price.")
 
     def check_quantity(self, field):
-        if not field.data:
-            raise ValidationError("Quantity is required.")
         try:
-            value = int(field.data)
+            value = field.data
             if value <= 0:
                 raise ValidationError("Quantity must be greater than 0.")
-        except ValueError:
-            raise ValidationError("Quantity must be a whole number.")
+        except TypeError:
+            return
 
     type = RadioField("Order Type", choices=["Bid", "Offer"], default="Bid", validators=[InputRequired()])
     price = DecimalField("Price (€)", default=1.00, validators=[check_price])

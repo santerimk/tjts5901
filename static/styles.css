@@ -109,6 +109,11 @@ body {
 	font-size: 1.1em;
 }
 
+#notify {
+	/* For displaying flash notifications. */
+	margin: 5em;
+}
+
 .info1 {
 	/* Colors general info messages. */
 	color: darkorange;
@@ -131,7 +136,6 @@ body {
 	position: absolute;
 	text-align: left;
 	left: 22.5em;
-	margin-left: 0.5em;
 	right: -100%;
 	width: 30em;
 }
@@ -142,15 +146,9 @@ body {
 	position: absolute;
 	text-align: left;
 	left: 16.5em;
-	bottom: 0.1em;
-	margin-left: 0.5em;
+	bottom: 0em;
 	right: -100%;
 	width: 30em;
-}
-
-#notify {
-	/* For displaying flash notifications. */
-	margin: 3em;
 }
 
 #stock-listing {
@@ -283,6 +281,16 @@ body {
 .order-header {
 	/* Own orders header positioning. */
 	margin: 3em 0 1em 0;
+}
+
+#form-header-container {
+	/* Stock form header container positioning. */
+	margin: 3em 0 2em 0;
+}
+
+#form-header-container > h1 {
+	/* Stock form header positioning. */
+	margin: 0 0 0.2em 0;
 }
 
 .own_order_table {

@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS traders;
 DROP TABLE IF EXISTS stocks;
 DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS trades;
 
 CREATE TABLE traders (
     traderid INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,4 +28,11 @@ CREATE TABLE orders (
     price REAL NOT NULL,
     FOREIGN KEY (traderid) REFERENCES traders(traderid),
     FOREIGN KEY (stockid) REFERENCES stocks(stockid)
+);
+
+CREATE TABLE trades (
+    tradeid INTEGER PRIMARY KEY AUTOINCREMENT,
+    trade_date TEXT NOT NULL,
+    price REAL NOT NULL,
+    quantity INTEGER NOT NULL
 );
