@@ -1,4 +1,4 @@
-from wtforms import StringField, PasswordField, SubmitField, ValidationError, RadioField, IntegerField, DecimalField, HiddenField
+from wtforms import StringField, PasswordField, SubmitField, ValidationError, RadioField, IntegerField, DecimalField, HiddenField, BooleanField
 from wtforms.validators import InputRequired
 from polyglot import PolyglotForm
 import stockmarket as db
@@ -83,8 +83,8 @@ class LoginForm(PolyglotForm):
 
 
 
-class StockOrderForm(PolyglotForm):
-    """Class for creating stock orders.
+class CreateOrderForm(PolyglotForm):
+    """Class for a stock order creation form.
     """    
     def check_price(self, field):
         if not field.data:
@@ -112,3 +112,37 @@ class StockOrderForm(PolyglotForm):
     order = SubmitField("Place Order")
     cancel = SubmitField("Cancel")
     hidden = HiddenField()
+
+
+
+class ModifyOrderForm(PolyglotForm):
+    """Class for a stock order modification form.
+    """    
+    def check_price(self, field):
+        if not field.data:
+            raise ValidationError(f"Price is required.")
+        try:
+            value = float(field.data)
+            if value <= 0:
+                raise ValidationError("Price must be greater than 0.")
+        except ValueError:
+            raise ValidationError("Price must be a decimal number.")
+
+    def check_quantity(self, field):
+        if not field.data:
+            raise ValidationError("Quantity is required.")
+        try:
+            value = int(field.data)
+            if value <= 0:
+                raise ValidationError("Quantity must be greater than 0.")
+        except ValueError:
+            raise ValidationError("Quantity must be a whole number.")
+
+    type = RadioField("Order Type", choices=["Bid", "Offer"], default="Bid", validators=[InputRequired()])
+    price = DecimalField("Price (€)", default=1.00, validators=[check_price])
+    quantity = IntegerField("Quantity (pcs)", default=1, validators=[check_quantity])
+    delete = BooleanField("Delete Order", default=False)
+    order = SubmitField("Modify Order")
+    cancel = SubmitField("Cancel")
+    hidden1 = HiddenField()
+    hidden2 = HiddenField()

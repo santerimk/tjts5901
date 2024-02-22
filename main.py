@@ -1,6 +1,6 @@
 from flask import Flask, redirect, render_template, request, session, url_for, flash
 from functools import wraps
-from forms import RegistryForm, LoginForm, StockOrderForm
+from forms import RegistryForm, LoginForm, CreateOrderForm, ModifyOrderForm
 import stockmarket as db
 from tools import hash_password
 from flask_wtf.csrf import CSRFProtect
@@ -99,16 +99,11 @@ def logout():
 def dashboard():
     """Shows the trader dashboard.
     """
-    return render_template('dashboard.html', trader=session['trader'])
-
-
-@app.route('/stock_listing', methods=['GET'])
-@auth_required
-def stock_listing():
-    """Lists all available stocks.
-    """
-    stocks = get_stocks()
-    return render_template('stock_listing.html', stocks=stocks)
+    trader = session['trader']
+    traderid = trader['traderid']
+    owned_stock_offers = build_owned_stock_offers(traderid)
+    owned_stock_bids = build_owned_stock_bids(traderid)
+    return render_template('dashboard.html', trader=session['trader'], owned_stock_offers=owned_stock_offers, owned_stock_bids=owned_stock_bids) # TODO: CONTINUE
 
 
 @app.route('/offer_listing', methods=['GET'])
@@ -135,11 +130,13 @@ def order_create():
     """
     try:
         stockid = int(request.args.get('stockid'))
-    except AttributeError:
+        order_type = request.args.get('order_type')
+    except (TypeError, ValueError, AttributeError):
         flash("Could'n find the stock.", 'error')
         redirect(url_for('dashboard'))
     stock = get_stock(stockid)
-    form = StockOrderForm()
+    form = CreateOrderForm()
+    form.type.data = order_type
     form.hidden.data = stockid
     return render_template('order_create.html', form=form, stock=stock)
     
@@ -148,7 +145,7 @@ def order_create():
 def order_place():
     """Handles placing the stock order.
     """
-    form = StockOrderForm(request.form)
+    form = CreateOrderForm(request.form)
     stockid = int(form.hidden.data)
     stock = get_stock(stockid)
     if request.form.get("cancel", ""):
@@ -167,6 +164,54 @@ def order_place():
     return redirect(url_for('dashboard'))
 
 
+@app.route('/order_modify', methods=['GET'])
+def order_modify():
+    """Creates a stock modifying form.
+    """
+    try:
+        stockid = int(request.args.get('stockid'))
+        orderid = int(request.args.get('orderid'))
+    except (TypeError, ValueError, AttributeError):
+        flash("Could'n find the order.", 'error')
+        redirect(url_for('dashboard'))
+    stock = get_stock(stockid)
+    order = get_order(orderid)
+    form = ModifyOrderForm()
+    form.hidden1.data = stockid
+    form.hidden2.data = orderid
+    form.type.data = 'Offer' if order['selling'] else 'Bid'
+    form.price.data = order['price']
+    form.quantity.data = order['quantity']
+    return render_template('order_modify.html', form=form, stock=stock)
+    
+
+@app.route('/order_update', methods=['POST'])
+def order_update():
+    """Handles modifying the stock order.
+    """
+    form = ModifyOrderForm(request.form)
+    stockid = int(form.hidden1.data)
+    orderid = int(form.hidden2.data)
+    stock = get_stock(stockid)
+    if request.form.get("cancel", ""):
+        return redirect(url_for('dashboard'))
+    if request.form.get("delete", ""):
+        delete_order(orderid)
+        flash('Order was deleted!', 'info')
+        return redirect(url_for("dashboard"))
+    if not form.validate():
+        return render_template('order_modify.html', form=form, stock=stock)
+    
+    order_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    quantity = int(form.quantity.data)
+    selling = form.type.data == 'Offer'
+    price = float(form.price.data)
+    update_order(orderid, order_date, quantity, selling, price)
+    flash('Order was modified!', 'info')
+    # TODO: Add the logic of checking and possibly completing transactions between matching bids and offers.
+    return redirect(url_for('dashboard'))
+
+
 @app.route('/orders', methods=['GET'])
 @auth_required
 def orders():
@@ -181,6 +226,26 @@ def orders():
         print(order['is_buy'])
         print(order['price'])
     return "Orders printed!"
+
+
+def build_owned_stock_offers(traderid):
+    stocks = get_stocks()
+    for stock in stocks:
+        offers = get_stock_offers_of_trader(stock['stockid'], traderid)
+        if offers:
+            stock['offers'] = offers
+    filtered_stocks = [stock for stock in stocks if 'offers' in stock]
+    return filtered_stocks
+
+
+def build_owned_stock_bids(traderid):
+    stocks = get_stocks()
+    for stock in stocks:
+        bids = get_stock_bids_of_trader(stock['stockid'], traderid)
+        if bids:
+            stock['bids'] = bids
+    filtered_stocks = [stock for stock in stocks if 'bids' in stock]
+    return filtered_stocks
 
 
 def build_offer_hierarchy():
@@ -229,18 +294,41 @@ def get_stock(stockid):
     return stock
 
 
+def get_order(orderid):
+    order = db.query("SELECT * FROM orders WHERE orderid = ?", (orderid,), True)
+    return order
+
+
+def update_order(orderid, order_date, quantity, selling, price):
+    db.modify("""
+        UPDATE orders
+        SET order_date = ?, quantity = ?, selling = ?, price = ?
+        WHERE orderid = ?
+        """, (order_date, quantity, selling, price, orderid))
+
+
+def delete_order(orderid):
+    db.modify("DELETE FROM orders WHERE orderid = ?", (orderid,))
+
+
 def get_stock_offers(stockid):
-    """Fetch orders where `selling` is 1 for the current stock
-    """
     offers = db.query("SELECT * FROM orders WHERE stockid = ? AND selling = 1 ORDER BY order_date DESC", (stockid,))
     return offers
 
 
+def get_stock_offers_of_trader(stockid, traderid):
+    offers = db.query("SELECT * FROM orders WHERE stockid = ? AND selling = 1 AND traderid = ? ORDER BY order_date DESC", (stockid, traderid,))
+    return offers
+
+
 def get_stock_bids(stockid):
-    """Fetch orders where `selling` is 1 for the current stock
-    """
     bids = db.query("SELECT * FROM orders WHERE stockid = ? AND selling = 0 ORDER BY order_date DESC", (stockid,))
     return bids
+
+
+def get_stock_bids_of_trader(stockid, traderid):
+    offers = db.query("SELECT * FROM orders WHERE stockid = ? AND selling = 0 AND traderid = ? ORDER BY order_date DESC", (stockid, traderid,))
+    return offers
 
 
 def get_trader_info(traderid):

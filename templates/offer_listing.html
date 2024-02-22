@@ -21,6 +21,11 @@
 			{% for stock in offer_hierarchy %}
 			<li>
 				<span class="heavy">{{ stock['stockname'] }}</span>
+				<a
+					class="order-link"
+					href="{{ url_for('order_create', stockid=stock['stockid'], order_type='Offer') }}"
+					>Order</a
+				>
 				<span>
 					(Last traded price: {{ stock['last_traded_price'] }} €)
 				</span>

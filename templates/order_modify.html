@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>New Order</title>
+		<title>Modify Order</title>
 		<link
 			rel="stylesheet"
 			href="{{ url_for('static', filename='styles.css') }}"
@@ -13,11 +13,11 @@
 		<!-- Add navigation bar to the page. -->
 		{% include 'navbar.html' %}
 
-		<h1>Create '{{ stock['stockname'] }}' Order</h1>
+		<h1>Modify '{{ stock['stockname'] }}' Order</h1>
 
 		<!-- Form for ordering stocks. -->
-		<form method="POST" action="{{ url_for('order_place') }}">
-			{{ form.csrf_token }} {{ form.hidden }}
+		<form method="POST" action="{{ url_for('order_update') }}">
+			{{ form.csrf_token }} {{ form.hidden1 }} {{ form.hidden2 }}
 			<fieldset class="custom-fieldset">
 				<div class="input-row">
 					{{ form.type.label(class_="input-label") }} {{
@@ -39,6 +39,10 @@
 					in form.quantity.errors %}
 					<span class="error2">{{ error|e }}</span>
 					{% endfor %}
+				</div>
+				<div class="input-row">
+					{{form.delete.label(class_="input-label")}}
+					{{form.delete(class_="input-field")}}
 				</div>
 				<div class="input-row">
 					{{ form.order(class_="submit") }} {{

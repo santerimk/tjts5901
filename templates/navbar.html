@@ -5,19 +5,19 @@
 			<div class="navgroup-left">
 				<!-- Dashboard. -->
 				<li class="navobj">
-					<a href="{{url_for('dashboard')}}">Dashboard</a>
-				</li>
-				<!-- Stocks List. -->
-				<li class="navobj">
-					<a href="{{url_for('stock_listing')}}">Stocks</a>
-				</li>
-				<!-- Offers List. -->
-				<li class="navobj">
-					<a href="{{url_for('offer_listing')}}">Offers</a>
+					<a href="{{url_for('dashboard')}}"
+						>{% if session['trader']['tradername'] %} {{
+						session['trader']['tradername'] }} {% else %} Dashboard
+						{% endif %}</a
+					>
 				</li>
 				<!-- Bids List. -->
 				<li class="navobj">
-					<a href="{{url_for('bid_listing')}}">Bids</a>
+					<a href="{{url_for('bid_listing')}}">Stock Bids</a>
+				</li>
+				<!-- Offers List. -->
+				<li class="navobj">
+					<a href="{{url_for('offer_listing')}}">Stock Offers</a>
 				</li>
 			</div>
 			<div class="navgroup-right">
