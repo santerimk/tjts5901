@@ -164,6 +164,12 @@ body {
 	text-align: left;
 }
 
+#trade-listing {
+	/* Design for trade lists. */
+	padding: 0;
+	margin: 2em 0.5em;
+}
+
 .item-listing {
 	/* Design for order tables. */
 	table-layout: fixed;

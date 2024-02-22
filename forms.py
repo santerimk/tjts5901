@@ -114,7 +114,7 @@ class CreateOrderForm(PolyglotForm):
 
     type = RadioField("Order Type", choices=["Bid", "Offer"], default="Bid", validators=[InputRequired()])
     price = DecimalField("Price (€)", default=1.00, validators=[check_price])
-    quantity = IntegerField("Quantity (pcs)", default=1, validators=[check_quantity])
+    quantity = IntegerField("Quantity", default=1, validators=[check_quantity])
     order = SubmitField("Place Order")
     cancel = SubmitField("Cancel")
     hidden = HiddenField()
@@ -152,7 +152,7 @@ class ModifyOrderForm(PolyglotForm):
 
     type = RadioField("Order Type", choices=["Bid", "Offer"], default="Bid", validators=[InputRequired()])
     price = DecimalField("Price (€)", default=1.00, validators=[check_price])
-    quantity = IntegerField("Quantity (pcs)", default=1, validators=[check_quantity])
+    quantity = IntegerField("Quantity", default=1, validators=[check_quantity])
     delete = BooleanField("Delete Order", default=False)
     order = SubmitField("Modify Order")
     cancel = SubmitField("Cancel")

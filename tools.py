@@ -73,7 +73,11 @@ def build_trade_hierarchy():
         trades = []
     for trade in trades:
         stock = get_stock(trade['stockid'])
+        seller = get_trader(trade['sellerid'])
+        buyer = get_trader(trade['buyerid'])
         trade['stockname'] = stock['stockname']
+        trade['sellername'] = seller['tradername']
+        trade['buyername'] = buyer['tradername']
     return trades
 
 
@@ -83,15 +87,21 @@ def run_order_matching(orderid):
     """
     order = get_order(orderid)
     if order['selling']:
+        sellerid = order['traderid']
         matching_orders = get_matching_bids(order['stockid'], order['traderid'], order['price'])
     else:
+        buyerid = order['traderid']
         matching_orders = get_matching_offers(order['stockid'], order['traderid'], order['price'])
 
     for match in matching_orders:
+        if order['selling']:
+            buyerid = match['traderid']
+        else:
+            sellerid = match['traderid']
         trade_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         traded_price = max(order['price'], match['price'])
         traded_quantity = min(order['quantity'], match['quantity'])
-        add_trade(order['stockid'], trade_date, traded_price, traded_quantity)
+        add_trade(order['stockid'], sellerid, buyerid, trade_date, traded_price, traded_quantity)
         match_new_quantity = match['quantity'] - traded_quantity
         order_new_quantity = order['quantity'] - traded_quantity
         if 0 < match_new_quantity:
@@ -131,7 +141,15 @@ def get_matching_offers(stockid, traderid, bidding_price):
     return matching_offers
 
 
-def get_trader(tradername):
+def get_trader(traderid):
+    trader = db.query("""
+        SELECT traderid, first_name, last_name, tradername FROM traders
+        WHERE traderid = ?
+        """, (traderid,), True)
+    return trader
+
+
+def get_trader_by_name(tradername):
     trader = db.query("""
         SELECT traderid, first_name, last_name, tradername FROM traders
         WHERE tradername = ?
@@ -155,11 +173,11 @@ def add_order(traderid, stockid, order_date, quantity, selling, price):
     return orderid
 
 
-def add_trade(stockid, trade_date, price, quantity):
+def add_trade(stockid, sellerid, buyerid, trade_date, price, quantity):
     tradeid = db.modify("""
-        INSERT INTO trades (stockid, trade_date, price, quantity)
-        VALUES (?, ?, ?, ?)
-        """, (stockid, trade_date, price, quantity))
+        INSERT INTO trades (stockid, sellerid, buyerid, trade_date, price, quantity)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, (stockid, sellerid, buyerid, trade_date, price, quantity))
     return tradeid
 
 

@@ -81,7 +81,7 @@ def auth():
     if not form.validate():
         return render_template('login.html', form=form)
     tradername = form.tradername.data.strip()
-    trader = get_trader(tradername)
+    trader = get_trader_by_name(tradername)
     session['trader'] = trader
     return redirect(url_for('dashboard'))
 

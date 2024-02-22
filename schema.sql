@@ -28,8 +28,12 @@ CREATE TABLE IF NOT EXISTS orders (
 CREATE TABLE IF NOT EXISTS trades (
     tradeid INTEGER PRIMARY KEY AUTOINCREMENT,
     stockid INTEGER NOT NULL,
+    sellerid INTEGER NOT NULL,
+    buyerid INTEGER NOT NULL,
     trade_date TEXT NOT NULL,
     price REAL NOT NULL,
     quantity INTEGER NOT NULL,
-    FOREIGN KEY (stockid) REFERENCES stocks(stockid)
+    FOREIGN KEY (stockid) REFERENCES stocks(stockid),
+    FOREIGN KEY (sellerid) REFERENCES traders(traderid),
+    FOREIGN KEY (buyerid) REFERENCES traders(traderid)
 );
