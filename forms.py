@@ -71,7 +71,7 @@ class LoginForm(PolyglotForm):
     def verify(self, field):
         if not field.data or not field.data.strip():
             raise ValidationError("Password is required.")
-        results = db.query("SELECT hashword FROM traders WHERE tradername = ?", (field.data.strip(),), True)
+        results = db.query("SELECT hashword FROM traders WHERE tradername = ?", (self.tradername.data.strip(),), True)
         if not results or not results['hashword']:
             return
         if not verify_password(field.data, results['hashword']):
