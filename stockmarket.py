@@ -1,7 +1,11 @@
 import sqlite3
-from tools import hash_password
+from tools import *
 
 DATABASE_NAME = "stockmarket.db"
+
+
+
+########## SET UP TOOLS ##########
 
 
 def get_connection():
@@ -18,6 +22,22 @@ def initialize():
         conn.executescript(file.read())
     conn.commit()
     conn.close()
+
+
+# !!!USE ONLY IF YOU NEED TO RESET THE DATABASE TABLES AND REMOVE DATA!!!
+def reset_and_populate(): # TODO: Comment out once software complete.
+    """For resetting the database, dropping all tables and their data,
+    recreating them."""
+    conn = get_connection()
+    with open('reset.sql', mode='r') as file:
+        conn.executescript(file.read())
+    test_populate()
+    conn.commit()
+    conn.close()
+
+
+
+########## GENERAL TOOLS ##########
 
 
 def query(query, args=(), one=False):
@@ -52,18 +72,6 @@ def modify(query, args=()):
     cur.close()
     conn.close()
     return id
-
-
-# !!!USE ONLY IF YOU NEED TO RESET THE DATABASE TABLES AND REMOVE DATA!!!
-def reset_and_populate(): # TODO: Comment out once software complete.
-    """For resetting the database, dropping all tables and their data,
-    recreating them."""
-    conn = get_connection()
-    with open('reset.sql', mode='r') as file:
-        conn.executescript(file.read())
-    test_populate()
-    conn.commit()
-    conn.close()
 
 
 # TODO: Implement the means to update stock "last_traded_price" and "last_cecked" values hourly with AAPL.
@@ -127,4 +135,225 @@ def test_populate(): # TODO: Comment out once software complete.
             INSERT INTO orders (traderid, stockid, order_date, quantity, selling, price)
             VALUES (?, ?, ?, ?, ?, ?)
             """, order)
+        
+
+
+########## SPECIFIC TOOLS ##########
+
+
+def get_tradernames():
+    """Retrieves a list of all tradernames of traders from the database.
+    """
+    trader_names = query("""
+        SELECT tradername FROM traders
+        """)
+    return trader_names
+
+
+def get_stocks():
+    """Retrieves a list of all stocks from the database.
+    """
+    stocks = query("""
+        SELECT * FROM stocks
+        ORDER BY stockname ASC
+        """)
+    return stocks
+
+
+def get_stock_bids(stockid):
+    """Retrieves a list of all buy bids for a specific stock
+    from the database.
+    """
+    bids = query("""
+        SELECT * FROM orders
+        WHERE stockid = ? AND selling = 0
+        ORDER BY order_date DESC
+        """, (stockid,))
+    return bids
+
+
+def get_stock_offers(stockid):
+    """Retrieves a list of all sell offers for a specific stock
+    from the database.
+    """
+    offers = query("""
+        SELECT * FROM orders
+        WHERE stockid = ? AND selling = 1
+        ORDER BY order_date DESC
+        """, (stockid,))
+    return offers
+
+
+def get_stock_bids_of_trader(stockid, traderid):
+    """Retrieves a list of buy bids made by a specific trader
+    for a specific stock from the database.
+    """
+    offers = query("""
+        SELECT * FROM orders
+        WHERE stockid = ? AND selling = 0 AND traderid = ?
+        ORDER BY order_date DESC
+        """, (stockid, traderid,))
+    return offers
+
+
+def get_stock_offers_of_trader(stockid, traderid):
+    """Retrieves a list of sell offers made by a specific trader
+    for a specific stock from the database.
+    """
+    offers = query("""
+        SELECT * FROM orders
+        WHERE stockid = ? AND selling = 1 AND traderid = ?
+        ORDER BY order_date DESC
+        """, (stockid, traderid,))
+    return offers
+
+
+def get_matching_bids(stockid, traderid, offering_price):
+    """Retrieves bids for a stock that meet or exceed
+    the specified offering price.
+    """
+    matching_bids = query("""
+        SELECT * FROM orders
+        WHERE stockid = ? AND selling = 0 AND price >= ? AND traderid != ?
+        ORDER BY price DESC, order_date ASC
+        """, (stockid, offering_price, traderid))
+    return matching_bids
+
+
+def get_matching_offers(stockid, traderid, bidding_price):
+    """Retrieve offers for a stock that are at most equal to
+    the specified bidding price.
+    """
+    matching_offers = query("""
+        SELECT * FROM orders
+        WHERE stockid = ? AND selling = 1 AND price <= ? AND traderid != ?
+        ORDER BY price ASC, order_date ASC
+        """, (stockid, bidding_price, traderid))
+    return matching_offers
+
+
+def get_trades():
+    """Retrieve a list of all trades from the database.
+    """
+    trades = query("""
+        SELECT * FROM trades
+        ORDER BY trade_date ASC
+        """)
+    return trades
+
+
+def get_trader(traderid):
+    """Retrieves information about a trader from the database
+    using their unique identifier.
+    """
+    trader = query("""
+        SELECT traderid, first_name, last_name, tradername FROM traders
+        WHERE traderid = ?
+        """, (traderid,), True)
+    return trader
+
+
+def get_trader_info(traderid):
+    """Retrieve basic information of a trader from the database
+    using their unique identifier.
+    """
+    trader_info = query("""
+        SELECT traderid, tradername FROM traders
+        WHERE traderid = ?
+        """, (traderid,), True)
+    return trader_info
+
+
+def get_trader_by_tradername(tradername):
+    """Retrieves information about a trader from the database
+    using their tradername.
+    """
+    trader = query("""
+        SELECT traderid, first_name, last_name, tradername FROM traders
+        WHERE tradername = ?
+        """, (tradername,), True)
+    return trader
+
+
+def get_hashword_by_tradername(tradername):
+    """Retrieves trader hashword from the database
+    using their tradername.
+    """
+    trader = query("""
+        SELECT hashword FROM traders
+        WHERE tradername = ?
+        """, (tradername,), True)
+    return trader
+
+
+def get_stock(stockid):
+    """Retrieves information about a stock from the database
+    using its unique identifier.
+    """
+    stock = query("""
+        SELECT * FROM stocks
+        WHERE stockid = ?
+        """, (stockid,), True)
+    return stock
+
+
+def get_order(orderid):
+    """Retrieves information about an order from the database
+    using its unique identifier.
+    """
+    order = query("""
+        SELECT * FROM orders
+        WHERE orderid = ?
+        """, (orderid,), True)
+    return order
+
+
+def add_trader(first_name, last_name, tradername, hashword):
+    """Adds a new trader to the database.
+    """
+    traderid = modify("""
+        INSERT INTO traders (first_name, last_name, tradername, hashword)
+        VALUES (?, ?, ?, ?)
+        """, (first_name, last_name, tradername, hashword))
+    return traderid
+
+
+def add_order(traderid, stockid, order_date, quantity, selling, price):
+    """Adds a new order to the database.
+    """
+    orderid = modify("""
+        INSERT INTO orders (traderid, stockid, order_date, quantity, selling, price)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, (traderid, stockid, order_date, quantity, selling, price))
+    return orderid
+
+
+def add_trade(stockid, sellerid, buyerid, trade_date, price, quantity):
+    """Adds a new trade to the database.
+    """
+    tradeid = modify("""
+        INSERT INTO trades (stockid, sellerid, buyerid, trade_date, price, quantity)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, (stockid, sellerid, buyerid, trade_date, price, quantity))
+    return tradeid
+
+
+def update_order(orderid, order_date, quantity, selling, price):
+    """Updates information of an existing order in the database.
+    """
+    modify("""
+        UPDATE orders
+        SET order_date = ?, quantity = ?, selling = ?, price = ?
+        WHERE orderid = ?
+        """, (order_date, quantity, selling, price, orderid))
+
+
+def delete_order(orderid):
+    """Delete an order from the database.
+    """
+    modify("""
+        DELETE FROM orders
+        WHERE orderid = ?
+        """, (orderid,))
+
 

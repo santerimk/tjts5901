@@ -1,7 +1,8 @@
 from wtforms import StringField, PasswordField, SubmitField, ValidationError, RadioField, IntegerField, DecimalField, HiddenField, BooleanField
 from wtforms.validators import InputRequired
 from polyglot import PolyglotForm
-from tools import verify_password, get_stock, get_trader_by_tradername, get_hashword_by_tradername, get_tradernames
+import stockmarket as db
+from tools import *
 
 
 
@@ -26,7 +27,7 @@ class RegistryForm(PolyglotForm):
         """
         if not field.data or not field.data.strip():
             raise ValidationError("Tradername is required.")
-        trader_names = get_tradernames()
+        trader_names = db.get_tradernames()
         all_comparables = [comparable.strip().lower() for comparable, in trader_names]
         tradername = field.data.strip().lower()
         if tradername in all_comparables:
@@ -78,7 +79,7 @@ class LoginForm(PolyglotForm):
         """
         if not field.data or not field.data.strip():
             raise ValidationError("Tradername is required.")
-        matched_trader = get_trader_by_tradername(field.data.strip())
+        matched_trader = db.get_trader_by_tradername(field.data.strip())
         if not matched_trader or not matched_trader['traderid']:
             raise ValidationError("Invalid tradername.")
     
@@ -87,7 +88,7 @@ class LoginForm(PolyglotForm):
         """
         if not field.data or not field.data.strip():
             raise ValidationError("Password is required.")
-        matched_trader = get_hashword_by_tradername(self.tradername.data.strip())
+        matched_trader = db.get_hashword_by_tradername(self.tradername.data.strip())
         if not matched_trader or not matched_trader['hashword']:
             return
         if not verify_password(field.data, matched_trader['hashword']):
@@ -115,7 +116,7 @@ class CreateOrderForm(PolyglotForm):
         if not float(value * 100).is_integer():
             raise ValidationError("Price must not have more than 2 decimal places.")  
         stockid = int(self.hidden.data)
-        stock = get_stock(stockid)
+        stock = db.get_stock(stockid)
         last_traded_price = stock['last_traded_price']
         print(type(last_traded_price))
         min_limit = last_traded_price * 0.9
@@ -159,7 +160,7 @@ class ModifyOrderForm(PolyglotForm):
         if not float(value * 100).is_integer():
             raise ValidationError("Price must not have more than 2 decimal places.")  
         stockid = int(self.hidden1.data)
-        stock = get_stock(stockid)
+        stock = db.get_stock(stockid)
         last_traded_price = stock['last_traded_price']
         print(type(last_traded_price))
         min_limit = last_traded_price * 0.9

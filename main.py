@@ -3,6 +3,7 @@ from functools import wraps
 from forms import RegistryForm, LoginForm, CreateOrderForm, ModifyOrderForm
 import stockmarket as db
 from tools import *
+
 from flask_wtf.csrf import CSRFProtect
 from datetime import datetime
 
@@ -12,11 +13,16 @@ csrf = CSRFProtect(app) # Add CSRF-protection (Cross-site request forgery) to th
 
 db.reset_and_populate() # TODO: Remove once done with testing the database.
 
+
 if __name__ == '__main__':
-    """Boots in a Flask-app environment.
-    Defines the host, port and debug-mode for the app.
+    """Boots the Flask-app environment.
+    Configures the host, port and debug-mode.
     """
     app.run(host='127.0.0.1', port=8080, debug=True)
+
+
+
+########## REST ROUTE FUNCTIONS ##########
 
 
 def auth_required(f):
@@ -59,7 +65,7 @@ def register():
     last_name = form.last_name.data.strip().lower().capitalize()
     tradername = form.tradername.data.strip() # TODO: Decide whether the tradername should be caseinsensitive or not. (Right now it is casesensiteve)
     hashword = hash_password(form.password.data)
-    add_trader(first_name, last_name, tradername, hashword)
+    db.add_trader(first_name, last_name, tradername, hashword)
     flash(f'New trader "{tradername}" registered!', 'info')
     return redirect(url_for('login'))
 
@@ -80,7 +86,7 @@ def auth():
     if not form.validate():
         return render_template('login.html', form=form)
     tradername = form.tradername.data.strip()
-    trader = get_trader_by_tradername(tradername)
+    trader = db.get_trader_by_tradername(tradername)
     session['trader'] = trader
     return redirect(url_for('dashboard'))
 
@@ -143,7 +149,7 @@ def order_create():
     except (TypeError, ValueError, AttributeError):
         flash("Could'n find the stock.", 'error')
         redirect(url_for('dashboard'))
-    stock = get_stock(stockid)
+    stock = db.get_stock(stockid)
     form = CreateOrderForm()
     form.hidden.data = stockid
     form.type.data = order_type
@@ -158,7 +164,7 @@ def order_place():
     """
     form = CreateOrderForm(request.form)
     stockid = int(form.hidden.data)
-    stock = get_stock(stockid)
+    stock = db.get_stock(stockid)
     if request.form.get("cancel", ""):
         return redirect(url_for('dashboard'))
     if not form.validate():
@@ -169,7 +175,7 @@ def order_place():
     quantity = int(form.quantity.data)
     selling = form.type.data == 'Offer'
     price = float(form.price.data)
-    orderid = add_order(traderid, stockid, order_date, quantity, selling, price)
+    orderid = db.add_order(traderid, stockid, order_date, quantity, selling, price)
     trade_made = run_order_matching(orderid)
     if trade_made:
         flash('Trade was made!', 'info')
@@ -189,8 +195,8 @@ def order_modify():
     except (TypeError, ValueError, AttributeError):
         flash("Could'n find the order.", 'error')
         redirect(url_for('dashboard'))
-    stock = get_stock(stockid)
-    order = get_order(orderid)
+    stock = db.get_stock(stockid)
+    order = db.get_order(orderid)
     form = ModifyOrderForm()
     form.hidden1.data = stockid
     form.hidden2.data = orderid
@@ -208,11 +214,11 @@ def order_update():
     form = ModifyOrderForm(request.form)
     stockid = int(form.hidden1.data)
     orderid = int(form.hidden2.data)
-    stock = get_stock(stockid)
+    stock = db.get_stock(stockid)
     if request.form.get("cancel", ""):
         return redirect(url_for('dashboard'))
     if request.form.get("delete", ""):
-        delete_order(orderid)
+        db.delete_order(orderid)
         flash('Order was deleted!', 'info')
         return redirect(url_for("dashboard"))
     if not form.validate():
@@ -222,7 +228,7 @@ def order_update():
     quantity = int(form.quantity.data)
     selling = form.type.data == 'Offer'
     price = float(form.price.data)
-    update_order(orderid, order_date, quantity, selling, price)
+    db.update_order(orderid, order_date, quantity, selling, price)
     trade_made = run_order_matching(orderid)
     if trade_made:
         flash('Trade was made!', 'info')
@@ -246,3 +252,120 @@ def order_update():
 #         print(order['is_buy'])
 #         print(order['price'])
 #     return "Orders printed!"
+
+
+
+########## SUPPORT FUNCTIONS ##########
+
+
+def build_owned_stock_offers(traderid):
+    """Builds a list of stocks along with their offers placed by the trader.
+    """
+    stocks = db.get_stocks()
+    if not stocks:
+        stocks = []
+    for stock in stocks:
+        offers = db.get_stock_offers_of_trader(stock['stockid'], traderid)
+        if offers:
+            stock['offers'] = offers
+    filtered_stocks = [stock for stock in stocks if 'offers' in stock]
+    return filtered_stocks
+
+
+def build_owned_stock_bids(traderid):
+    """Builds a list of stocks along with their bids placed by the trader.
+    """
+    stocks = db.get_stocks()
+    if not stocks:
+        stocks = []
+    for stock in stocks:
+        bids = db.get_stock_bids_of_trader(stock['stockid'], traderid)
+        if bids:
+            stock['bids'] = bids
+    filtered_stocks = [stock for stock in stocks if 'bids' in stock]
+    return filtered_stocks
+
+
+def build_offer_hierarchy():
+    """Builds a hierarchy of all stocks and their respective offers
+    and trader information.
+    """
+    stocks = db.get_stocks()
+    if not stocks:
+        stocks = []
+    for stock in stocks:
+        offers = db.get_stock_offers(stock['stockid'])
+        for offer in offers:
+            traderid = offer.pop('traderid')
+            offer['seller'] = db.get_trader_info(traderid)
+        stock['offers'] = offers
+    return stocks
+
+
+def build_bid_hierarchy():
+    """Builds a hierarchy of all stocks and their respective bids
+    and trader information.
+    """
+    stocks = db.get_stocks()
+    if not stocks:
+        stocks = []
+    for stock in stocks:
+        bids = db.get_stock_bids(stock['stockid'])
+        for bid in bids:
+            traderid = bid.pop('traderid')
+            bid['buyer'] = db.get_trader_info(traderid)
+        stock['bids'] = bids
+    return stocks
+
+
+def build_trade_hierarchy():
+    """Builds a hierarchy of all trades including detailed information
+    about stocks, sellers, and buyers.
+    """
+    trades = db.get_trades()
+    if not trades:
+        trades = []
+    for trade in trades:
+        stock = db.get_stock(trade['stockid'])
+        seller = db.get_trader(trade['sellerid'])
+        buyer = db.get_trader(trade['buyerid'])
+        trade['stockname'] = stock['stockname']
+        trade['sellername'] = seller['tradername']
+        trade['buyername'] = buyer['tradername']
+    return trades
+
+
+def run_order_matching(orderid):
+    """Matches the given order with existing bids or offers creating trades
+    and updating or removing the orders involved in the trades accordingly.
+    """
+    order = db.get_order(orderid)
+    if order['selling']:
+        sellerid = order['traderid']
+        matching_orders = db.get_matching_bids(order['stockid'], order['traderid'], order['price'])
+    else:
+        buyerid = order['traderid']
+        matching_orders = db.get_matching_offers(order['stockid'], order['traderid'], order['price'])
+
+    for match in matching_orders:
+        if order['selling']:
+            buyerid = match['traderid']
+        else:
+            sellerid = match['traderid']
+        trade_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        traded_price = max(order['price'], match['price'])
+        traded_quantity = min(order['quantity'], match['quantity'])
+        db.add_trade(order['stockid'], sellerid, buyerid, trade_date, traded_price, traded_quantity)
+        match_new_quantity = match['quantity'] - traded_quantity
+        order_new_quantity = order['quantity'] - traded_quantity
+        if 0 < match_new_quantity:
+            db.update_order(match['orderid'], match['order_date'], match_new_quantity, match['selling'], match['price'])
+        else:
+            db.delete_order(match['orderid'])
+        if 0 < order_new_quantity:
+            db.update_order(order['orderid'], order['order_date'], order_new_quantity, order['selling'], order['price'])
+        else:
+            db.delete_order(order['orderid'])
+            break
+
+    return matching_orders != None
