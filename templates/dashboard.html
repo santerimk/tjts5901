@@ -17,8 +17,10 @@
 			Welcome, {{ trader['first_name'] }} {{ trader['last_name'] }}
 		</p>
 
+		<!-- Bids header. -->
 		<h2 class="order-header">Your Bids</h2>
 
+		<!-- Owned bids infromation. -->
 		<div>
 			{% for stock in owned_stock_bids %}
 			<div class="light-heavy">{{ stock['stockname'] }}</div>
@@ -42,8 +44,10 @@
 			{% endfor %}
 		</div>
 
+		<!-- Offers header. -->
 		<h2 class="order-header">Your Offers</h2>
 
+		<!-- Owned offers infromation. -->
 		<div>
 			{% for stock in owned_stock_offers %}
 			<div class="light-heavy">{{ stock['stockname'] }}</div>

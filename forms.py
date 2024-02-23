@@ -1,31 +1,41 @@
 from wtforms import StringField, PasswordField, SubmitField, ValidationError, RadioField, IntegerField, DecimalField, HiddenField, BooleanField
 from wtforms.validators import InputRequired
 from polyglot import PolyglotForm
-import stockmarket as db
-from tools import verify_password, get_stock
+from tools import verify_password, get_stock, get_trader_by_tradername, get_hashword_by_tradername, get_tradernames
 
 
 
 class RegistryForm(PolyglotForm):
-    """Class for a registry form.
+    """Form class for user registration. Includes fields for first name, last name, tradername,
+    password, and password confirmation.
     """
     def require_first_name(self, field):
+        """Validates that the first name field is not empty or only whitespace.
+        """
         if not field.data or not field.data.strip():
             raise ValidationError("First name is required.")
 
     def require_last_name(self, field):
+        """Validates that the last name field is not empty or only whitespace.
+        """
         if not field.data or not field.data.strip():
             raise ValidationError("Last name is required.")
 
     def check_uniqueness(self, field):
+        """Validates that the tradername is unique within the database.
+        """
         if not field.data or not field.data.strip():
             raise ValidationError("Tradername is required.")
-        all_comparables = [comparable.strip().lower() for comparable, in db.query("SELECT tradername FROM traders")]
+        trader_names = get_tradernames()
+        all_comparables = [comparable.strip().lower() for comparable, in trader_names]
         tradername = field.data.strip().lower()
         if tradername in all_comparables:
             raise ValidationError(f'Tradername "{tradername.capitalize()}" already exists. Please choose a different one.')
 
     def check_complexity(self, field):
+        """Validates the complexity of the password. Ensures it is at least 8 characters long,
+        contains at least one digit, one uppercase letter, one lowercase letter, and one special character.
+        """
         if not field.data or not field.data.strip():
             raise ValidationError("Password is required.")
         password = field.data
@@ -43,6 +53,8 @@ class RegistryForm(PolyglotForm):
             raise ValidationError("Password must include at least one special character.")
 
     def check_match(self, field):
+        """Validates that the password and password confirmation fields match.
+        """
         if not field.data or not field.data.strip():
             raise ValidationError("Password confirmation is required.")
         if field.data != self.password.data:
@@ -59,22 +71,26 @@ class RegistryForm(PolyglotForm):
 
 
 class LoginForm(PolyglotForm):
-    """Class for a login form.
+    """Form class for user login. Includes fields for tradername and password.
     """
     def check_if_exists(self, field):
+        """Validates that the tradername exists in the database.
+        """
         if not field.data or not field.data.strip():
             raise ValidationError("Tradername is required.")
-        results = db.query("SELECT traderid FROM traders WHERE tradername = ?", (field.data.strip(),), True)
-        if not results or not results['traderid']:
+        matched_trader = get_trader_by_tradername(field.data.strip())
+        if not matched_trader or not matched_trader['traderid']:
             raise ValidationError("Invalid tradername.")
     
     def verify(self, field):
+        """Validates the password against the stored hash for the given tradername.
+        """
         if not field.data or not field.data.strip():
             raise ValidationError("Password is required.")
-        results = db.query("SELECT hashword FROM traders WHERE tradername = ?", (self.tradername.data.strip(),), True)
-        if not results or not results['hashword']:
+        matched_trader = get_hashword_by_tradername(self.tradername.data.strip())
+        if not matched_trader or not matched_trader['hashword']:
             return
-        if not verify_password(field.data, results['hashword']):
+        if not verify_password(field.data, matched_trader['hashword']):
             raise ValidationError("Invalid password.")
 
     tradername = StringField("Tradername", validators=[check_if_exists])
@@ -84,9 +100,13 @@ class LoginForm(PolyglotForm):
 
 
 class CreateOrderForm(PolyglotForm):
-    """Class for a stock order creation form.
-    """    
+    """Form class for creating a stock order. Includes fields for specifying
+    order type (bid or offer), price, quantity, and a hidden field for stock ID.
+    """
     def check_price(self, field):
+        """Validates that the price is a positive decimal number with no more than 2 decimal places
+        and is within 10% of the last traded price of the stock.
+        """
         value = field.data
         if not str(value).replace('-', '', 1).replace(',', '.', 1).replace('.', '', 1).isdigit():
             raise ValidationError("Price must be a decimal number.")
@@ -105,6 +125,8 @@ class CreateOrderForm(PolyglotForm):
             raise ValidationError(f"Price must be within 10% of the last traded price.")
 
     def check_quantity(self, field):
+        """Validates that the quantity is a positive integer.
+        """
         try:
             value = field.data
             if value <= 0:
@@ -122,9 +144,13 @@ class CreateOrderForm(PolyglotForm):
 
 
 class ModifyOrderForm(PolyglotForm):
-    """Class for a stock order modification form.
-    """    
+    """Form class for modifying an existing stock order. Similar to the CreateOrderForm,
+    but also includes an option field for deleting the order and hidden(2) field for order ID.
+    """
     def check_price(self, field):
+        """Validates that the price is a positive decimal number with no more than 2 decimal places
+        and is within 10% of the last traded price of the stock.
+        """
         value = field.data
         if not str(value).replace('-', '', 1).replace(',', '.', 1).replace('.', '', 1).isdigit():
             raise ValidationError("Price must be a decimal number.")
@@ -143,6 +169,8 @@ class ModifyOrderForm(PolyglotForm):
             raise ValidationError(f"Price must be within 10% of the last traded price.")
 
     def check_quantity(self, field):
+        """Validates that the quantity is a positive integer.
+        """
         try:
             value = field.data
             if value <= 0:

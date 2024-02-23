@@ -10,8 +10,7 @@ app = Flask(__name__)
 app.secret_key = '!secret'
 csrf = CSRFProtect(app) # Add CSRF-protection (Cross-site request forgery) to the Flask-app.
 
-db.reset() # TODO: Remove once done with testing the database.
-db.test_populate() # TODO: Remove once done with testing the database.
+db.reset_and_populate() # TODO: Remove once done with testing the database.
 
 if __name__ == '__main__':
     """Boots in a Flask-app environment.
@@ -58,7 +57,7 @@ def register():
         return render_template('registry.html', form=form)
     first_name = form.first_name.data.strip().lower().capitalize()
     last_name = form.last_name.data.strip().lower().capitalize()
-    tradername = form.tradername.data.strip() # TODO: Decide whether the tradername should be caseinsensitive or not.
+    tradername = form.tradername.data.strip() # TODO: Decide whether the tradername should be caseinsensitive or not. (Right now it is casesensiteve)
     hashword = hash_password(form.password.data)
     add_trader(first_name, last_name, tradername, hashword)
     flash(f'New trader "{tradername}" registered!', 'info')
@@ -81,7 +80,7 @@ def auth():
     if not form.validate():
         return render_template('login.html', form=form)
     tradername = form.tradername.data.strip()
-    trader = get_trader_by_name(tradername)
+    trader = get_trader_by_tradername(tradername)
     session['trader'] = trader
     return redirect(url_for('dashboard'))
 
@@ -103,7 +102,7 @@ def dashboard():
     traderid = trader['traderid']
     owned_stock_offers = build_owned_stock_offers(traderid)
     owned_stock_bids = build_owned_stock_bids(traderid)
-    return render_template('dashboard.html', trader=session['trader'], owned_stock_offers=owned_stock_offers, owned_stock_bids=owned_stock_bids) # TODO: CONTINUE
+    return render_template('dashboard.html', trader=session['trader'], owned_stock_offers=owned_stock_offers, owned_stock_bids=owned_stock_bids)
 
 
 @app.route('/offer_listing', methods=['GET'])
@@ -134,6 +133,7 @@ def trade_listing():
 
 
 @app.route('/order_create', methods=['GET'])
+@auth_required
 def order_create():
     """Creates a stock ordering form.
     """
@@ -152,6 +152,7 @@ def order_create():
     
 
 @app.route('/order_place', methods=['POST'])
+@auth_required
 def order_place():
     """Handles placing the stock order.
     """
@@ -178,6 +179,7 @@ def order_place():
 
 
 @app.route('/order_modify', methods=['GET'])
+@auth_required
 def order_modify():
     """Creates a stock modifying form.
     """
@@ -199,6 +201,7 @@ def order_modify():
     
 
 @app.route('/order_update', methods=['POST'])
+@auth_required
 def order_update():
     """Handles modifying the stock order.
     """
@@ -228,17 +231,18 @@ def order_update():
     return redirect(url_for('dashboard'))
 
 
-@app.route('/orders', methods=['GET'])
-@auth_required
-def orders():
-    orders_query = 'SELECT * FROM orders'
-    orders = db.query(orders_query)
-    for order in orders: # Prints order results to console
-        print(order['id'])
-        print(order['trader_id'])
-        print(order['stock_id'])
-        print(order['date'])
-        print(order['quantity'])
-        print(order['is_buy'])
-        print(order['price'])
-    return "Orders printed!"
+# TODO: Delete or uncomment?
+# @app.route('/orders', methods=['GET'])
+# @auth_required
+# def orders():
+#     orders_query = 'SELECT * FROM orders'
+#     orders = db.query(orders_query)
+#     for order in orders: # Prints order results to console
+#         print(order['id'])
+#         print(order['trader_id'])
+#         print(order['stock_id'])
+#         print(order['date'])
+#         print(order['quantity'])
+#         print(order['is_buy'])
+#         print(order['price'])
+#     return "Orders printed!"

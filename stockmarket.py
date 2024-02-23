@@ -1,5 +1,4 @@
 import sqlite3
-from datetime import datetime
 from tools import hash_password
 
 DATABASE_NAME = "stockmarket.db"
@@ -10,21 +9,12 @@ def get_connection():
     """
     return sqlite3.connect(DATABASE_NAME)
 
+
 def initialize():
     """For initializing the database.
     """
     conn = get_connection()
     with open('schema.sql', mode='r') as file:
-        conn.executescript(file.read())
-    conn.commit()
-    conn.close()
-
-
-# !!!USE ONLY IF YOU NEED TO RESET THE DATABASE TABLES AND REMOVE DATA!!!
-def reset():
-    """For resetting the database, dropping all tables and their data, recreating them."""
-    conn = get_connection()
-    with open('reset.sql', mode='r') as file:
         conn.executescript(file.read())
     conn.commit()
     conn.close()
@@ -64,7 +54,25 @@ def modify(query, args=()):
     return id
 
 
-def test_populate():
+# !!!USE ONLY IF YOU NEED TO RESET THE DATABASE TABLES AND REMOVE DATA!!!
+def reset_and_populate(): # TODO: Comment out once software complete.
+    """For resetting the database, dropping all tables and their data,
+    recreating them."""
+    conn = get_connection()
+    with open('reset.sql', mode='r') as file:
+        conn.executescript(file.read())
+    test_populate()
+    conn.commit()
+    conn.close()
+
+
+# TODO: Implement the means to update stock "last_traded_price" and "last_cecked" values hourly with AAPL.
+
+
+def test_populate(): # TODO: Comment out once software complete.
+    """For test populating the database with mock data,
+    only for development purposes.
+    """
     # Insert traders
     traders_data = [
         ('Alex', 'Turner', 'alex_t', f'{hash_password("Pass123%")}'),
@@ -72,7 +80,10 @@ def test_populate():
         ('Ethan', 'Hunt', 'ethan_h', f'{hash_password("Pass789%")}')
     ]
     for trader in traders_data:
-        modify("INSERT INTO traders (first_name, last_name, tradername, hashword) VALUES (?, ?, ?, ?)", trader)
+        modify("""
+            INSERT INTO traders (first_name, last_name, tradername, hashword)
+            VALUES (?, ?, ?, ?)
+            """, trader)
         
     # Insert stocks
     stocks_data = [
@@ -83,7 +94,10 @@ def test_populate():
         ('Tesla', 720.30, '2023-02-01 09:00:00')
     ]
     for stock in stocks_data:
-        modify("INSERT INTO stocks (stockname, last_traded_price, last_checked) VALUES (?, ?, ?)", stock)
+        modify("""
+            INSERT INTO stocks (stockname, last_traded_price, last_checked)
+            VALUES (?, ?, ?)
+            """, stock)
     
     # Insert orders
     orders_data = [
@@ -109,5 +123,8 @@ def test_populate():
         (2, 5, '2023-02-02 13:45:00', 8, 0, 143.50)
     ]
     for order in orders_data:
-        modify("INSERT INTO orders (traderid, stockid, order_date, quantity, selling, price) VALUES (?, ?, ?, ?, ?, ?)", order)
+        modify("""
+            INSERT INTO orders (traderid, stockid, order_date, quantity, selling, price)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """, order)
 

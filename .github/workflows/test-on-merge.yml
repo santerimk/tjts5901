@@ -1,25 +1,28 @@
-
 name: Test On Merge to Main
 
 on:
-  pull_request:
-    types: [closed]
-    branches:
-      - main
+    pull_request:
+        types: [closed]
+        branches:
+            - main
 jobs:
-  run-tests:
-    if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.11'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Run tests
-        run: pytest testfile.py
+    run-tests:
+        if: github.event.pull_request.merged == true
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v2
+            - name: Set up Python 3.11
+              uses: actions/setup-python@v2
+              with:
+                  python-version: "3.11"
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install -r requirements.txt
+            - name: Run tests
+              run: |
+                  pytest main.py
+                  pytest tools.py
+                  pytest stockmarket.py
+                  pytest forms.py
