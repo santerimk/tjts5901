@@ -22,7 +22,4 @@ jobs:
                   pip install -r requirements.txt
             - name: Run tests
               run: |
-                  pytest main.py
-                  pytest tools.py
-                  pytest stockmarket.py
-                  pytest forms.py
+                  pytest unit_tests.py
