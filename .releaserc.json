@@ -1,0 +1,3 @@
+{
+	"branches": ["main", "master", { "name": "test", "prerelease": true }]
+}
