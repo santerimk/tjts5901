@@ -21,7 +21,7 @@ jobs:
 
             - name: Run coverage and generate Markdown
               run: |
-                  coverage run tests.py
+                  coverage run unit_tests.py
                   coverage report -m > coverage_report.txt
                   echo "## Coverage Summary" > $GITHUB_STEP_SUMMARY
                   echo "| Name     | Stmts | Miss | Cover | Missing lines                                     |" >> $GITHUB_STEP_SUMMARY
