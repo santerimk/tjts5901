@@ -50,7 +50,7 @@ jobs:
                   awk '
                   /^=+$/ { next } # Skip lines that are entirely "="
                   /Starting Quality Test Session|Summary|Possible Resolution|Check completed/ {
-                      print "\n\n==========", $0, "==========\n"
+                      print "\n\n**" $0 "**\n"
                       next
                   }
                   { print }
