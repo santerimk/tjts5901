@@ -1,32 +1,36 @@
-name: Unit Tests and Coverage
-
 on:
     push:
         branches:
             - test
 
 jobs:
-    build:
+    unit-tests:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v2
+            - name: Checkout code
+              uses: actions/checkout@v2
 
             - name: Set up Python
               uses: actions/setup-python@v2
               with:
-                  python-version: "3.11"
+                  python-version: "3.8"
 
             - name: Install dependencies
-              run: |
-                  python -m pip install --upgrade pip
-                  pip install -r requirements.txt
+              run: pip install -r requirements.txt
 
-            - name: Run pytest
+            - name: Run coverage and generate Markdown
               run: |
-                  pytest --cov=./
+                  coverage run tests.py
+                  coverage report -m > coverage_report.txt
+                  echo "## Coverage Summary" > $GITHUB_STEP_SUMMARY
+                  echo "| Name     | Stmts | Miss | Cover | Missing lines                                     |" >> $GITHUB_STEP_SUMMARY
+                  echo "|----------|-------|------|-------|---------------------------------------------------|" >> $GITHUB_STEP_SUMMARY
+                  awk 'NR>2 && !/^[- ]*$/ && !/^TOTAL/ {printf "| %-9s| %-6s| %-5s| %-6s| ", $1, $2, $3, $4; missing=""; for (i=5; i<=NF; i++) {if ($i ~ /^[0-9-]+$/) {if (missing != "") missing = missing ", "; missing = missing $i;} else {if (missing != "") missing = missing " "; missing = missing $i;}} sub(/, $/, "", missing); gsub(/, /, ", ", missing); printf "%-49s|\n", missing }' coverage_report.txt >> $GITHUB_STEP_SUMMARY
+                  awk '/TOTAL/ && !/^[- ]*$/{printf "| %-9s| %-6s| %-5s| %-6s| ", $1, $2, $3, $4; missing=""; for (i=5; i<=NF; i++) {if ($i ~ /^[0-9-]+$/) {if (missing != "") missing = missing ", "; missing = missing $i;} else {if (missing != "") missing = missing " "; missing = missing $i;}} sub(/, $/, "", missing); gsub(/, /, ", ", missing); printf "%-49s|\n", missing }' coverage_report.txt >> $GITHUB_STEP_SUMMARY
 
-            - name: Upload coverage to Codecov
-              uses: codecov/codecov-action@v1
+            - name: Upload coverage table as artifact
+              uses: actions/upload-artifact@v2
               with:
-                  token: ${{ secrets.CODECOV_TOKEN }}
+                  name: coverage-table
+                  path: coverage_report.txt
