@@ -40,7 +40,7 @@ jobs:
 
             - name: Run code-quality analysis
               run: |
-                  python -m pcq -fs . > code_quality_report.txt
+                  python -m pycodequality -fs . > code_quality_report.txt
                   echo "::set-output name=code_quality_report::$(cat code_quality_report.txt)"
                   - name: Add code quality report to job summary
                   if: always() # Ensure this step runs even if previous steps fail
