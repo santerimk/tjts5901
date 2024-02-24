@@ -47,11 +47,12 @@ jobs:
               if: always()
               run: |
                   echo '### Code Quality Report' >> $GITHUB_STEP_SUMMARY
+                  sed '/^=+$/d' code_quality_report.txt > temp_report.txt
                   awk '
-                  /^=+$/ { next } # Skip lines that are entirely "="
                   /Starting Quality Test Session|Summary|Possible Resolution|Check completed/ {
-                      print "\n\n**" $0 "**\n"
+                      print "\n\n==========", $0, "==========\n"
                       next
                   }
                   { print }
-                  ' code_quality_report.txt >> $GITHUB_STEP_SUMMARY
+                  ' temp_report.txt >> $GITHUB_STEP_SUMMARY
+                  rm temp_report.txt # Cleanup
