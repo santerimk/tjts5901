@@ -47,7 +47,12 @@ jobs:
               if: always()
               run: |
                   echo '### Code Quality Report' >> $GITHUB_STEP_SUMMARY
-                  sed -e 's/^==============================================================/---/' \
-                      -e 's/^=========================================================================/---/' \
-                      -e 's/^====================================================================/---/' \
-                      code_quality_report.txt >> $GITHUB_STEP_SUMMARY
+                  awk '
+                  BEGIN { OFS="\n" }
+                  /^---/ { 
+                      getline nextLine; 
+                      print "\n\n==========", nextLine, "==========\n"; 
+                      next; 
+                  }
+                  { print }
+                  ' code_quality_report.txt >> $GITHUB_STEP_SUMMARY
