@@ -43,8 +43,8 @@ jobs:
               run: |
                   python -m code_quality -d . > code_quality_report.txt
                   echo "::set-output name=code_quality_report::$(cat code_quality_report.txt)"
-                  - name: Add code quality report to job summary
-                  if: always() # Ensure this step runs even if previous steps fail
-                  run: |
+            - name: Add code quality report to job summary
+              if: always()
+              run: |
                   echo '### Code Quality Report' >> $GITHUB_STEP_SUMMARY
                   sed 's/^=//; s/=$//' code_quality_report.txt >> $GITHUB_STEP_SUMMARY
