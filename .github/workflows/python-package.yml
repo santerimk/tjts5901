@@ -27,7 +27,7 @@ jobs:
               run: |
                   python -m pip install --upgrade pip
                   python -m pip install flake8 pytest
-                  python -m pip install pycodequality scp paramiko
+                  python -m pip install code-quality
                   if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
             - name: Lint with flake8
               run: |
@@ -41,7 +41,7 @@ jobs:
 
             - name: Run code-quality analysis
               run: |
-                  python -m pycodequality -fs . > code_quality_report.txt
+                  python -m code-quality -d . > code_quality_report.txt
                   echo "::set-output name=code_quality_report::$(cat code_quality_report.txt)"
                   - name: Add code quality report to job summary
                   if: always() # Ensure this step runs even if previous steps fail
