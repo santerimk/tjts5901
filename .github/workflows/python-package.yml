@@ -48,6 +48,7 @@ jobs:
               run: |
                   echo '### Code Quality Report' >> $GITHUB_STEP_SUMMARY
                   awk '
+                  /^=+$/ { next } # Skip lines that are entirely "="
                   /Starting Quality Test Session|Summary|Possible Resolution|Check completed/ {
                       print "\n\n==========", $0, "==========\n"
                       next
