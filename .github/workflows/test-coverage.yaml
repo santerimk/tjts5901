@@ -27,24 +27,32 @@ jobs:
                   echo "| Name     | Stmts | Miss | Cover | Missing lines                                     |" >> $GITHUB_STEP_SUMMARY
                   echo "|----------|-------|------|-------|---------------------------------------------------|" >> $GITHUB_STEP_SUMMARY
                   awk 'NR>2 && !/^[- ]*$/ && !/^TOTAL/ {
-                      printf "| %-9s| %-6s| %-5s| %-6s| ", $1, $2, $3, $4;
-                      missing="";
+                      printf "| %-9s| %-6s| %-5s| %-6s| ", $1, $2, $3, $4; 
+                      missing=""; 
                       for (i=5; i<=NF; i++) {
-                          if ($i ~ /^[0-9]+(-[0-9]+)?$/) {  # Match a number or a range
-                              missing = (missing != "") ? missing ", " $i : $i;
+                          if ($i ~ /^[0-9,-]+$/) {  
+                              if (missing != "" && substr(missing, length(missing)) != ",") missing = missing ", ";
+                              missing = missing $i;
+                          } else {
+                              if (missing != "" && substr(missing, length(missing)) != " ") missing = missing " ";
+                              missing = missing $i;
                           }
                       }
+                      missing = gensub(/,/, ", ", "g", missing); # Ensure space after each comma
                       printf "%-49s|\n", missing
                   }' coverage_report.txt >> $GITHUB_STEP_SUMMARY
 
-                  awk '/TOTAL/ {
-                      printf "| %-9s| %-6s| %-5s| %-6s| ", $1, $2, $3, $4;
-                      missing="";
+                  awk '/TOTAL/ && !/^[- ]*$/{
+                      printf "| %-9s| %-6s| %-5s| %-6s| ", $1, $2, $3, $4; 
+                      missing=""; 
                       for (i=5; i<=NF; i++) {
-                          if ($i ~ /^[0-9]+(-[0-9]+)?$/) {  # Match a number or a range
+                          if ($i ~ /^[0-9-]+$/) {
                               missing = (missing != "") ? missing ", " $i : $i;
+                          } else {
+                              missing = (missing != "") ? missing " " $i : $i;
                           }
                       }
+                      missing = gensub(/,/, ", ", "g", missing); # Ensure space after each comma
                       printf "%-49s|\n", missing
                   }' coverage_report.txt >> $GITHUB_STEP_SUMMARY
 
