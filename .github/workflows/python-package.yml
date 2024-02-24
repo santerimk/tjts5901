@@ -48,11 +48,14 @@ jobs:
               run: |
                   echo '### Code Quality Report' >> $GITHUB_STEP_SUMMARY
                   awk '
-                  BEGIN { OFS="\n" }
-                  /^---/ { 
-                      getline nextLine; 
-                      print "\n\n==========", nextLine, "==========\n"; 
-                      next; 
+                  /^=+$/ {
+                      getline nextLine
+                      if (nextLine ~ /Starting Quality Test Session|Summary|Possible Resolution|Check completed/) {
+                          print "\n\n==========", nextLine, "==========\n"
+                      } else {
+                          print $0 "\n" nextLine
+                      }
+                      next
                   }
                   { print }
                   ' code_quality_report.txt >> $GITHUB_STEP_SUMMARY
