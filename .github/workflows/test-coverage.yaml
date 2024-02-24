@@ -30,17 +30,20 @@ jobs:
                       printf "| %-9s| %-6s| %-5s| %-6s| ", $1, $2, $3, $4; 
                       missing=""; 
                       for (i=5; i<=NF; i++) {
-                          if ($i ~ /^[0-9,-]+$/) {  # Modified to include commas in the regex, just in case
+                          if ($i ~ /^[0-9,-]+$/) { 
                               if (missing != "" && substr(missing, length(missing)) != ",") missing = missing ", ";
                               missing = missing $i;
                           } else {
-                              missing = (missing != "") ? missing " " $i : $i;
+                              if (missing != "" && substr(missing, length(missing)) != " ") missing = missing " ";
+                              missing = missing $i;
                           }
                       } 
-                      gsub(/,,/, ",", missing);  # Correct double commas, if any
+                      missing = gensub(/,/, ", ", "g", missing);  # Ensure space after each comma
+                      missing = gensub(/, ,/, ", ", "g", missing); # Correct any ', ,' just in case
+                      missing = gensub(/,,/, ",", "g", missing);   # Clean up any double commas
+                      missing = gensub(/, $/, "", "g", missing);   # Remove trailing comma, if any
                       printf "%-49s|\n", missing
                   }' coverage_report.txt >> $GITHUB_STEP_SUMMARY
-
 
                   awk '/TOTAL/ && !/^[- ]*$/{
                       printf "| %-9s| %-6s| %-5s| %-6s| ", $1, $2, $3, $4; 
@@ -52,6 +55,10 @@ jobs:
                               missing = (missing != "") ? missing " " $i : $i;
                           }
                       } 
+                      missing = gensub(/,/, ", ", "g", missing);  # Ensure space after each comma
+                      missing = gensub(/, ,/, ", ", "g", missing); # Correct any ', ,' just in case
+                      missing = gensub(/,,/, ",", "g", missing);   # Clean up any double commas
+                      missing = gensub(/, $/, "", "g", missing);   # Remove trailing comma, if any
                       printf "%-49s|\n", missing
                   }' coverage_report.txt >> $GITHUB_STEP_SUMMARY
 
