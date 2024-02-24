@@ -47,7 +47,7 @@ jobs:
               if: always()
               run: |
                   echo '### Code Quality Report' >> $GITHUB_STEP_SUMMARY
-                  sed '/^=+$/d' code_quality_report.txt > temp_report.txt
+                  sed 's/^=*//; s/=*$//' code_quality_report.txt > temp_report.txt
                   awk '
                   /Starting Quality Test Session|Summary|Possible Resolution|Check completed/ {
                       print "\n\n==========", $0, "==========\n"
