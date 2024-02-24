@@ -1,6 +1,7 @@
 on:
     push:
         branches:
+            - main
             - test
 
 jobs:
@@ -14,7 +15,7 @@ jobs:
             - name: Set up Python
               uses: actions/setup-python@v2
               with:
-                  python-version: "3.8"
+                  python-version: "3.11"
 
             - name: Install dependencies
               run: pip install -r requirements.txt
@@ -38,7 +39,7 @@ jobs:
                               missing = missing $i;
                           }
                       }
-                      missing = gensub(/,/, ", ", "g", missing); # Ensure space after each comma
+                      missing = gensub(/,/, ", ", "g", missing);
                       printf "%-49s|\n", missing
                   }' coverage_report.txt >> $GITHUB_STEP_SUMMARY
 
@@ -52,7 +53,7 @@ jobs:
                               missing = (missing != "") ? missing " " $i : $i;
                           }
                       }
-                      missing = gensub(/,/, ", ", "g", missing); # Ensure space after each comma
+                      missing = gensub(/,/, ", ", "g", missing);
                       printf "%-49s|\n", missing
                   }' coverage_report.txt >> $GITHUB_STEP_SUMMARY
 
