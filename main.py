@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.secret_key = '!secret'
 csrf = CSRFProtect(app) # Add CSRF-protection (Cross-site request forgery) to the Flask-app.
 
-db.reset_and_populate() # TODO: Remove once done with testing the database.
+# db.reset_and_populate() # TODO: Remove once done with testing the database.
 
 
 if __name__ == '__main__':
@@ -280,6 +280,8 @@ def build_owned_stock_bids(traderid):
         stocks = []
     for stock in stocks:
         bids = db.get_stock_bids_of_trader(stock['stockid'], traderid)
+        if not bids:
+            continue
         if bids:
             stock['bids'] = bids
     filtered_stocks = [stock for stock in stocks if 'bids' in stock]
@@ -295,6 +297,8 @@ def build_offer_hierarchy():
         stocks = []
     for stock in stocks:
         offers = db.get_stock_offers(stock['stockid'])
+        if not offers:
+            continue
         for offer in offers:
             traderid = offer.pop('traderid')
             offer['seller'] = db.get_trader_info(traderid)
@@ -346,6 +350,9 @@ def run_order_matching(orderid):
     else:
         buyerid = order['traderid']
         matching_orders = db.get_matching_offers(order['stockid'], order['traderid'], order['price'])
+    
+    if not matching_orders:
+        return False
 
     for match in matching_orders:
         if order['selling']:
