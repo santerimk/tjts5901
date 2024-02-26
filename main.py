@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.secret_key = '!secret'
 csrf = CSRFProtect(app) # Add CSRF-protection (Cross-site request forgery) to the Flask-app.
 
-# db.reset_and_populate() # TODO: Remove once done with testing the database.
+db.reset_and_populate() # TODO: Remove once done with testing the database.
 
 
 if __name__ == '__main__':
@@ -31,7 +31,12 @@ def auth_required(f):
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'trader' not in session:
+        if 'trader' not in session: # Checks if trader is in session.
+            return redirect(url_for('login'))
+        trader = session['trader']
+        database_match = db.get_trader(trader['traderid'])
+        if not database_match: # Checks that trader in session is in database.
+            session.clear()
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -63,7 +68,7 @@ def register():
         return render_template('registry.html', form=form)
     first_name = form.first_name.data.strip().lower().capitalize()
     last_name = form.last_name.data.strip().lower().capitalize()
-    tradername = form.tradername.data.strip() # TODO: Decide whether the tradername should be caseinsensitive or not. (Right now it is casesensiteve)
+    tradername = form.tradername.data.strip()
     hashword = hash_password(form.password.data)
     db.add_trader(first_name, last_name, tradername, hashword)
     flash(f'New trader "{tradername}" registered!', 'info')
