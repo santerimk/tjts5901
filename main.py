@@ -242,23 +242,6 @@ def order_update():
     return redirect(url_for('dashboard'))
 
 
-# TODO: Delete or uncomment?
-# @app.route('/orders', methods=['GET'])
-# @auth_required
-# def orders():
-#     orders_query = 'SELECT * FROM orders'
-#     orders = db.query(orders_query)
-#     for order in orders: # Prints order results to console
-#         print(order['id'])
-#         print(order['trader_id'])
-#         print(order['stock_id'])
-#         print(order['date'])
-#         print(order['quantity'])
-#         print(order['is_buy'])
-#         print(order['price'])
-#     return "Orders printed!"
-
-
 
 ########## SUPPORT FUNCTIONS ##########
 
@@ -360,6 +343,7 @@ def run_order_matching(orderid):
         return False
 
     for match in matching_orders:
+        order = db.get_order(orderid)
         if order['selling']:
             buyerid = match['traderid']
         else:
