@@ -1,5 +1,8 @@
 import sqlite3
 from tools import *
+import requests
+from apscheduler.schedulers.blocking import BlockingScheduler
+from datetime import datetime
 
 DATABASE_NAME = "stockmarket.db"
 
@@ -73,8 +76,40 @@ def modify(query, args=()):
     conn.close()
     return id
 
+# TODO: Implement the means to update stock "last_traded_price" and "last_checked" values hourly with AAPL.
+def fetch_aapl_price():
+    '''Fetching the AAPL last traded price
+    '''
+    url = "https://api.marketdata.app/v1/stocks/quotes/AAPL/"
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            aapl_price = data.get('last', [None]) [0]
+            return aapl_price
+        else:
+            print(f"Failed to fetch AAPL price, status code: {response.status_code}")
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+    return None
 
-# TODO: Implement the means to update stock "last_traded_price" and "last_cecked" values hourly with AAPL.
+def update_aapl_stock_price(aapl_price):
+    ''' Updating the AAPL stock price based on the API response
+    '''
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    modify("""
+        UPDATE stocks
+        SET last_traded_price = ?, last_checked = ?
+        WHERE stockname = 'Apple'
+        """, (aapl_price, now))
+
+def hourly_update():
+    ''' Hourly update function which is ran from main.py using a scheduler.
+    '''
+    print("Executing hourly update..")
+    price = fetch_aapl_price()
+    update_aapl_stock_price(price)
+    print(f"Updated AAPL stock price to {price} at {datetime.now()}")
 
 
 def test_populate(): # TODO: Comment out once software complete.
