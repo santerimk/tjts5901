@@ -78,8 +78,7 @@ def modify(query, args=()):
 
 # TODO: Implement the means to update stock "last_traded_price" and "last_checked" values hourly with AAPL.
 def fetch_aapl_price():
-    '''Fetching the AAPL last traded price from the marketdata API
-    '''
+    """Fetching the AAPL last traded price from the marketdata app API"""
     url = "https://api.marketdata.app/v1/stocks/quotes/AAPL/"
     try:
         response = requests.get(url)
@@ -93,19 +92,41 @@ def fetch_aapl_price():
         print(f"Request failed: {e}")
     return None
 
+
 def update_aapl_stock_price(aapl_price):
-    ''' Updating the AAPL stock price based on the API response
-    '''
+    """
+    Updating the AAPL stock price based on the API response. If API fetch fails,
+    retains the old price.
+    """
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    # Fetch the current price from the database first
+    current_price = query("""
+        SELECT last_traded_price FROM stocks
+        WHERE stockname = 'Apple'
+        """, one=True)
+    
+    # If API fetch was successful, update with the new price; otherwise, skip update
+    if aapl_price is not None:
+        price_to_update = aapl_price
+    else:
+        print("API fetch failed, keeping the old price.")
+        if current_price is not None:
+            # Log current price or handle accordingly if needed
+            print(f"Current price: {current_price['last_traded_price']}")
+        return  # Exit function without updating price
+    
     modify("""
         UPDATE stocks
         SET last_traded_price = ?, last_checked = ?
         WHERE stockname = 'Apple'
-        """, (aapl_price, now))
+        """, (price_to_update, now))
+
 
 def hourly_update():
-    ''' Hourly update function with a scheduler in main.py
-    '''
+    """ 
+    Hourly update function with a scheduler in main.py
+    """
     print("Executing hourly update..")
     price = fetch_aapl_price()
     update_aapl_stock_price(price)

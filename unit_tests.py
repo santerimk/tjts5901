@@ -62,30 +62,16 @@ class TestStockMarketFunctions(unittest.TestCase):
 
 
     def test_add_trader(self):
-        '''
-        testing for add_trader function
-        '''
+        """ testing for add_trader function
+        """
         # Call the function
         trader_id = add_trader('John', 'Doe', 'johndoe', 'hashedpassword')
         # Assertions
         self.assertEqual(trader_id, 1)
 
-
-    def test_fetch_aapl_price(self):
-        '''
-        test for the API fetch
-        '''
-        # Call the function
-        price = fetch_aapl_price()
-        # Assertions
-        self.assertEqual(price, 123.45)
-        self.mock_get.assert_called_once_with("https://api.marketdata.app/v1/stocks/quotes/AAPL/")
-
-
     def test_hourly_update(self):
-        '''
-        Test for the hourly update function
-        '''
+        """ Test for the hourly update function
+        """
         hourly_update()
 
         # Since modify is a local function, we need to patch it within the context of this test
@@ -98,33 +84,10 @@ class TestStockMarketFunctions(unittest.TestCase):
             mock_modify.assert_called_once_with(ANY, (123.45, unittest.mock.ANY))
 
 
-    @patch('stockmarket.modify')
-    @patch('stockmarket.datetime')
-    def test_update_aapl_stock_price(self, mock_datetime, mock_modify):
-        '''
-        Test for the function that updates AAPL stock price via mock
-        '''  
-        # Setup the mock datetime to return a fixed moment in time
-        mock_datetime.now.return_value.strftime.return_value = '2024-02-29 15:31:23'
-        
-        aapl_price = 150.0
-        update_aapl_stock_price(aapl_price)
-        
-        # Normalize the expected SQL query
-        expected_sql = "UPDATE stocks SET last_traded_price = ?, last_checked = ? WHERE stockname = 'Apple'"
-        actual_sql = " ".join(mock_modify.call_args[0][0].split())
-        expected_args = (150.0, '2024-02-29 15:31:23')
-        actual_args = mock_modify.call_args[0][1]
-        
-        # Assert that the normalized actual SQL matches the expected SQL
-        self.assertEqual(expected_sql, actual_sql)
-        self.assertEqual(expected_args, actual_args)
-
     @patch('stockmarket.get_connection')
     def test_query_multiple_rows(self, mock_get_connection):
-        '''
-        Test for query function multiple rows using MagicMock
-        '''
+        """ Test for query function multiple rows using MagicMock
+        """
         # Setup mock connection and cursor
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
@@ -149,9 +112,8 @@ class TestStockMarketFunctions(unittest.TestCase):
 
     @patch('stockmarket.get_connection')
     def test_query_single_row(self, mock_get_connection):
-        '''
-        Test for query function single rows using MagicMock
-        '''
+        """ Test for query function single rows using MagicMock
+        """
         # Setup mock connection and cursor
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
@@ -176,6 +138,8 @@ class TestStockMarketFunctions(unittest.TestCase):
 
     @patch('stockmarket.get_connection')
     def test_modify_insert(self, mock_get_connection):
+        """ Test for modify insert
+        """
         # Setup mock connection and cursor
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
@@ -198,6 +162,8 @@ class TestStockMarketFunctions(unittest.TestCase):
 
     @patch('stockmarket.get_connection')
     def test_modify_update(self, mock_get_connection):
+        """ Test for modify update
+        """
         # Setup for an update operation is similar to insert, without the lastrowid
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
@@ -217,12 +183,76 @@ class TestStockMarketFunctions(unittest.TestCase):
         
         self.assertIsNone(result)
 
+class TestFetchAPI(unittest.TestCase):
+        
+    @patch('stockmarket.requests.get')
+    def test_fetch_success(self, mock_get):
+        """ Test for the success of fetch
+        """
+        # Mock a successful API response
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = {'last': [150.00]}
+
+        price = fetch_aapl_price()
+        self.assertEqual(price, 150.00)
+
+    @patch('stockmarket.requests.get')
+    def test_fetch_failure(self, mock_get):
+        """ Test for the failure of fetch
+        """
+        # Mock a failure in API response
+        mock_get.return_value.status_code = 404
+
+        price = fetch_aapl_price()
+        self.assertIsNone(price)
+
+    @patch('stockmarket.modify')
+    @patch('stockmarket.query')
+    @patch('stockmarket.datetime')
+    def test_update_stock_price(self, mock_datetime, mock_query, mock_modify):
+        """ Test for the update of stock price
+        """
+        # Setup the mock for datetime.now() to return a specific datetime
+        mock_datetime.now.return_value.strftime.return_value = '2024-02-29 15:31:23'
+        mock_query.return_value = {'last_traded_price': 100.00}  # Simulate existing price
+        new_price = 150.00  # Simulate new fetched price
+
+        # Call the function
+        update_aapl_stock_price(new_price)
+
+        # Normalize SQL query string for comparison
+        actual_call_args = mock_modify.call_args[0]
+        actual_sql = " ".join(actual_call_args[0].split())
+        actual_params = actual_call_args[1]
+
+        expected_sql = "UPDATE stocks SET last_traded_price = ?, last_checked = ? WHERE stockname = 'Apple'"
+        expected_params = (150.0, '2024-02-29 15:31:23')
+
+        # Assert modify was called with normalized SQL query and correct parameters
+        self.assertEqual(actual_sql, expected_sql)
+        self.assertEqual(actual_params, expected_params)
+
+    @patch('stockmarket.modify')
+    @patch('stockmarket.query')
+    @patch('stockmarket.datetime')
+    def test_update_fetch_failure(self, mock_datetime, mock_query, mock_modify):
+        """ Test for failure of the update fetch with modify
+        """
+        # Set up mocks
+        mock_datetime.return_value.strftime.return_value = '2024-02-29 15:31:23'
+        mock_query.return_value = {'last_traded_price': 100.00}  # Simulate existing price
+        
+        # Call the function with None to simulate fetch failure
+        update_aapl_stock_price(None)
+
+        # Assert modify was NOT called, since update should be skipped
+        mock_modify.assert_not_called()
+
 class TestSpecificTools(unittest.TestCase):
     @patch('stockmarket.query')
     def test_get_tradernames(self, mock_query):
-        '''
-        Test for getting tradernames
-        '''  
+        """ Test for getting tradernames
+        """  
         # Mock return value of query to simulate database response
         mock_query.return_value = [{'tradername': 'Alice'}, {'tradername': 'Bob'}]
         result = get_tradernames()
@@ -239,9 +269,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.query')
     def test_get_stocks(self, mock_query):
-        '''
-        Test for getting stocks
-        '''  
+        """ Test for getting stocks
+        """  
         # Setup the mock to return a simulated database response
         mock_query.return_value = [
             {'stockname': 'Apple', 'last_traded_price': 150.00, 'last_checked': '2024-02-29'},
@@ -263,9 +292,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.query')
     def test_get_stock_bids(self, mock_query):
-        '''
-        Test for getting stock bids
-        '''  
+        """ Test for getting stock bids
+        """  
         # Setup the mock to return a simulated database response for bids
         mock_query.return_value = [
             {'order_id': 1, 'stockid': 1, 'selling': 0, 'order_date': '2024-02-29', 'quantity': 100, 'price': 150.00},
@@ -287,9 +315,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.query')
     def test_get_stock_offers(self, mock_query):
-        '''
-        Test for getting stock offers
-        '''  
+        """ Test for getting stock offers
+        """  
         # Setup the mock to return a simulated database response for offers
         mock_query.return_value = [
             {'order_id': 3, 'stockid': 1, 'selling': 1, 'order_date': '2024-02-27', 'quantity': 200, 'price': 155.00},
@@ -311,9 +338,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.query')
     def test_get_stock_bids_of_trader(self, mock_query):
-        '''
-        Test for getting stock bids of a specific trader
-        '''  
+        """ Test for getting stock bids of a specific trader
+        """  
         # Setup the mock to return a simulated database response
         mock_query.return_value = [
             {'order_id': 1, 'stockid': 1, 'traderid': 1, 'selling': 0, 'order_date': '2024-02-29', 'quantity': 100, 'price': 150.00}
@@ -335,9 +361,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.query')
     def test_get_stock_offers_of_trader(self, mock_query):
-        '''
-        Test for getting stock offers of a specific trader
-        '''  
+        """ Test for getting stock offers of a specific trader
+        """  
         # Setup the mock to return a simulated database response
         mock_query.return_value = [
             {'order_id': 2, 'stockid': 1, 'traderid': 1, 'selling': 1, 'order_date': '2024-02-28', 'quantity': 50, 'price': 155.00}
@@ -359,9 +384,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.query')
     def test_get_matching_bids(self, mock_query):
-        '''
-        Test for getting matching bids
-        '''  
+        """ Test for getting matching bids
+        """  
         # Setup the mock to return a simulated database response
         mock_query.return_value = [
             {'order_id': 3, 'stockid': 1, 'traderid': 2, 'selling': 0, 'order_date': '2024-02-27', 'quantity': 200, 'price': 160.00}
@@ -385,9 +409,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.query')
     def test_get_matching_offers(self, mock_query):
-        '''
-        Test for getting matching orders
-        '''  
+        """ Test for getting matching orders
+        """  
         # Setup the mock to return a simulated database response
         mock_query.return_value = [
             {'order_id': 4, 'stockid': 1, 'traderid': 2, 'selling': 1, 'order_date': '2024-02-26', 'quantity': 100, 'price': 150.00}
@@ -411,9 +434,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.query')
     def test_get_trades(self, mock_query):
-        '''
-        Test for getting trades by trade id
-        '''  
+        """ Test for getting trades by trade id
+        """  
         # Setup the mock to return a simulated database response
         mock_query.return_value = [
             {'trade_id': 1, 'trade_date': '2024-02-29', 'stockid': 1, 'price': 150.00, 'quantity': 100},
@@ -432,9 +454,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.query')
     def test_get_trader(self, mock_query):
-        '''
-        Test for getting a trader
-        '''
+        """ Test for getting a trader
+        """
         # Setup the mock to return a simulated database response
         mock_query.return_value = {
             'traderid': 1, 'first_name': 'John', 'last_name': 'Doe', 'tradername': 'johndoe'
@@ -455,9 +476,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.query')
     def test_get_trader_info(self, mock_query):
-        '''
-        Test for getting a trader's info
-        '''  
+        """ Test for getting a trader's info
+        """  
         # Setup the mock to return a simulated database response
         mock_query.return_value = {'traderid': 1, 'tradername': 'john_doe'}
         trader_id = 1
@@ -477,9 +497,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.query')
     def test_get_trader_by_tradername(self, mock_query):
-        '''
-        Test for getting a trader by trader's name
-        '''  
+        """ Test for getting a trader by trader's name
+        """  
         # Setup the mock to return a simulated database response
         mock_query.return_value = {'traderid': 1, 'first_name': 'John', 'last_name': 'Doe', 'tradername': 'john_doe'}
         tradername = 'john_doe'
@@ -499,9 +518,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.query')
     def test_get_hashword_by_tradername(self, mock_query):
-        '''
-        Test for getting the hashword for individual trader by name
-        '''  
+        """ Test for getting the hashword for individual trader by name
+        """  
         # Setup the mock to return a simulated database response
         mock_query.return_value = {'hashword': 'hashed_password'}
         tradername = 'john_doe'
@@ -521,9 +539,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.query')
     def test_get_stock(self, mock_query):
-        '''
-        Test for getting a stock
-        '''  
+        """ Test for getting a stock
+        """  
         # Setup the mock to return a simulated database response
         mock_query.return_value = {
             'stockid': 1, 'stockname': 'Apple', 'last_traded_price': 150.00, 'last_checked': '2024-02-29'
@@ -544,9 +561,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.query')
     def test_get_order(self, mock_query):
-        '''
-        Test for getting an order
-        '''  
+        """ Test for getting an order
+        """  
         # Setup the mock to return a simulated database response
         mock_query.return_value = {
             'orderid': 1, 'traderid': 1, 'stockid': 1, 'order_date': '2024-02-29', 'quantity': 100, 'price': 150.00, 'selling': 0
@@ -567,9 +583,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.modify')
     def test_add_trader(self, mock_modify):
-        '''
-        Test for adding a trader
-        '''  
+        """ Test for adding a trader
+        """  
         first_name = 'John'
         last_name = 'Doe'
         tradername = 'johndoe'
@@ -594,9 +609,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.modify')
     def test_add_order(self, mock_modify):
-        '''
-        Test for adding an order
-        '''  
+        """ Test for adding an order
+        """  
         traderid = 1
         stockid = 1
         order_date = '2024-02-29'
@@ -623,9 +637,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.modify')
     def test_add_trade(self, mock_modify):
-        '''
-        Test for adding a trade
-        '''        
+        """ Test for adding a trade
+        """        
         stockid = 1
         sellerid = 1
         buyerid = 2
@@ -652,9 +665,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.modify')
     def test_update_order(self, mock_modify):
-        '''
-        Test for updating order
-        '''
+        """ Test for updating order
+        """
         orderid = 1
         order_date = '2024-03-01'
         quantity = 150
@@ -679,9 +691,8 @@ class TestSpecificTools(unittest.TestCase):
 
     @patch('stockmarket.modify')
     def test_delete_order(self, mock_modify):
-        '''
-        Test for deleting order
-        '''
+        """ Test for deleting order
+        """
         orderid = 1
         delete_order(orderid)
 

@@ -32,7 +32,7 @@ if __name__ == '__main__':
     """
     # THIS IS COMMENTED OUT SO THE API CALLS AREN'T SPAMMED CONSTANTLY
     # You can test by uncommenting it and it should retrieve the price 
-    start_scheduler() 
+    #start_scheduler() 
     app.run(host='127.0.0.1', port=8080, debug=True)
 
 
