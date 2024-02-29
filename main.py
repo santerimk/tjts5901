@@ -24,6 +24,7 @@ def start_scheduler():
     scheduler.add_job(stockmarket.hourly_update, 'interval', hours=1, next_run_time=datetime.now())
     scheduler.start()
     print("Scheduler started")
+    atexit.register(lambda: scheduler.shutdown())
 
 if __name__ == '__main__':
     """Boots the Flask-app environment.
@@ -31,7 +32,7 @@ if __name__ == '__main__':
     """
     # THIS IS COMMENTED OUT SO THE API CALLS AREN'T SPAMMED CONSTANTLY
     # You can test by uncommenting it and it should retrieve the price 
-    #start_scheduler() 
+    start_scheduler() 
     app.run(host='127.0.0.1', port=8080, debug=True)
 
 

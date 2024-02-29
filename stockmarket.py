@@ -78,14 +78,14 @@ def modify(query, args=()):
 
 # TODO: Implement the means to update stock "last_traded_price" and "last_checked" values hourly with AAPL.
 def fetch_aapl_price():
-    '''Fetching the AAPL last traded price
+    '''Fetching the AAPL last traded price from the marketdata API
     '''
     url = "https://api.marketdata.app/v1/stocks/quotes/AAPL/"
     try:
         response = requests.get(url)
-        if response.status_code == 200:
+        if response.status_code in [200, 203]:
             data = response.json()
-            aapl_price = data.get('last', [None]) [0]
+            aapl_price = data.get('last', [None])[0]
             return aapl_price
         else:
             print(f"Failed to fetch AAPL price, status code: {response.status_code}")
