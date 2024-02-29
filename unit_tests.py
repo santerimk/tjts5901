@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock, ANY
-from stockmarket import add_trader, fetch_aapl_price, update_aapl_stock_price, hourly_update, get_tradernames, get_stocks, get_stock_bids, get_stock_offers, get_stock_bids_of_trader, get_stock_offers_of_trader, get_matching_bids, get_matching_offers, get_trades, get_trader, get_trader_info, get_trader_by_tradername, get_hashword_by_tradername, get_stock, get_order, add_order, add_trade, update_order, delete_order
+import stockmarket
+from stockmarket import add_trader, fetch_aapl_price, update_aapl_stock_price, hourly_update, get_tradernames, get_stocks, get_stock_bids, get_stock_offers, get_stock_bids_of_trader, get_stock_offers_of_trader, get_matching_bids, get_matching_offers, get_trades, get_trader, get_trader_info, get_trader_by_tradername, get_hashword_by_tradername, get_stock, get_order, add_order, add_trade, update_order, delete_order, requests
 from datetime import datetime
 
 def add(a, b):
@@ -83,7 +84,7 @@ class TestStockMarketFunctions(unittest.TestCase):
 
     def test_hourly_update(self):
         '''
-        test for the hourly update function
+        Test for the hourly update function
         '''
         hourly_update()
 
@@ -119,6 +120,102 @@ class TestStockMarketFunctions(unittest.TestCase):
         self.assertEqual(expected_sql, actual_sql)
         self.assertEqual(expected_args, actual_args)
 
+    @patch('stockmarket.get_connection')
+    def test_query_multiple_rows(self, mock_get_connection):
+        '''
+        Test for query function multiple rows using MagicMock
+        '''
+        # Setup mock connection and cursor
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_get_connection.return_value = mock_conn
+        mock_conn.cursor.return_value = mock_cursor
+        
+        # Adjust mock cursor's fetchall to return sample data as dictionaries
+        # This simulates the behavior of fetchall() when conn.row_factory = sqlite3.Row
+        mock_data = [{'name': 'Alice', 'id': 1}, {'name': 'Bob', 'id': 2}]
+        mock_cursor.fetchall.return_value = mock_data
+        
+        # Call the function under test
+        sql = "SELECT name, id FROM users"
+        result = stockmarket.query(sql)
+        
+        # Verify SQL execution
+        mock_cursor.execute.assert_called_once_with(sql, ())
+        
+        # Check return value structure
+        expected_result = [{'name': 'Alice', 'id': 1}, {'name': 'Bob', 'id': 2}]
+        self.assertEqual(result, expected_result)
+
+    @patch('stockmarket.get_connection')
+    def test_query_single_row(self, mock_get_connection):
+        '''
+        Test for query function single rows using MagicMock
+        '''
+        # Setup mock connection and cursor
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_get_connection.return_value = mock_conn
+        mock_conn.cursor.return_value = mock_cursor
+
+        # Directly mock cursor's fetchall to return a list of dictionaries
+        # This simulates the behavior of fetchall() when conn.row_factory = sqlite3.Row
+        mock_data = [{'name': 'Alice', 'id': 1}]
+        mock_cursor.fetchall.return_value = mock_data
+
+        # Call the function with 'one=True'
+        sql = "SELECT name, id FROM users WHERE name = ?"
+        result = stockmarket.query(sql, args=('Alice',), one=True)
+
+        # Verify SQL execution
+        mock_cursor.execute.assert_called_once_with(sql, ('Alice',))
+
+        # Check return value structure
+        expected_result = {'name': 'Alice', 'id': 1}
+        self.assertEqual(result, expected_result)
+
+    @patch('stockmarket.get_connection')
+    def test_modify_insert(self, mock_get_connection):
+        # Setup mock connection and cursor
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_get_connection.return_value = mock_conn
+        mock_conn.cursor.return_value = mock_cursor
+        mock_cursor.lastrowid = 1 
+
+        # Example SQL insert query
+        sql = "INSERT INTO users (name, age) VALUES (?, ?)"
+        args = ('Alice', 30)
+
+        # Call the function under test
+        row_id = stockmarket.modify(sql, args)
+
+        # Verify SQL execution
+        mock_cursor.execute.assert_called_with(sql, args)
+        mock_conn.commit.assert_called()
+
+        self.assertEqual(row_id, 1)
+
+    @patch('stockmarket.get_connection')
+    def test_modify_update(self, mock_get_connection):
+        # Setup for an update operation is similar to insert, without the lastrowid
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_get_connection.return_value = mock_conn
+        mock_conn.cursor.return_value = mock_cursor
+
+        # Example SQL update query
+        sql = "UPDATE users SET age = ? WHERE name = ?"
+        args = (35, 'Alice')
+
+        # Call the function under test
+        result = stockmarket.modify(sql, args)
+
+        # Verify SQL execution
+        mock_cursor.execute.assert_called_with(sql, args)
+        mock_conn.commit.assert_called()
+        
+        self.assertIsNone(result)
 
 class TestSpecificTools(unittest.TestCase):
     @patch('stockmarket.query')
