@@ -28,7 +28,7 @@
 				{% for bid in stock['bids'] %}
 				<li>
 					<span
-						>Buying: {{ bid['price'] }} € , Quantity: {{
+						>Buying: {{ bid['price'] }} $ , Quantity: {{
 						bid['quantity'] }} , {{ bid['order_date'] }}</span
 					>
 					<a
@@ -55,7 +55,7 @@
 				{% for offer in stock['offers'] %}
 				<li>
 					<span
-						>Selling: {{ offer['price'] }} € , Quantity: {{
+						>Selling: {{ offer['price'] }} $ , Quantity: {{
 						offer['quantity'] }} , {{ offer['order_date'] }}</span
 					>
 					<a

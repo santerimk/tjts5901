@@ -7,9 +7,9 @@ document.addEventListener("DOMContentLoaded", function () {
 		let priceLabel = document.getElementById("price-label");
 
 		if (selectedType === "Bid") {
-			priceLabel.textContent = "Max Price (€):";
+			priceLabel.textContent = "Max Price ($):";
 		} else {
-			priceLabel.textContent = "Min Price (€):";
+			priceLabel.textContent = "Min Price ($):";
 		}
 	}
 

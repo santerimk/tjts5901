@@ -104,7 +104,7 @@ def update_aapl_stock_price(aapl_price):
         """, (aapl_price, now))
 
 def hourly_update():
-    ''' Hourly update function which is ran from main.py using a scheduler.
+    ''' Hourly update function with a scheduler in main.py
     '''
     print("Executing hourly update..")
     price = fetch_aapl_price()
