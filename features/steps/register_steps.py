@@ -19,17 +19,33 @@ def when_user_submits_form_with_existing_username(context):
     assert response.status_code == 200, "Couldn't reach register."
 
 
+@when('the user submits a registration form with valid data')
+def when_user_submits_form_with_valid_data(context):
+    form_data = {
+        'first_name': 'Valid',
+        'last_name': 'User',
+        'tradername': 'valid_user',
+        'password': 'ValidPass123%'
+    }
+    response = context.client.post('/register', data=form_data, follow_redirects=True)
+    assert response.status_code == 200, "Couldn't complete registration with valid data."
+
 
 @when('the user submits a registration form with invalid data')
 def when_user_submits_form_with_invalid_data(context):
     form_data = {
         'first_name': '',
         'last_name': 'Doe',
-        'tradername': 'newUser',
+        'tradername': 'new_user',
         'password': 'Pass123%'
     }
     response = context.client.post('/register', data=form_data, follow_redirects=True)
     assert response.status_code == 200, "Couldn't reach register."
+
+
+@then('the user should be registered successfully')
+def then_user_registered_successfully(context):
+    assert 'New trader "valid_user" registered!' in context.response.data.decode(), "User was not registered successfully."
 
 
 @then('the user should see an error message about username uniqueness')
