@@ -3,28 +3,28 @@ from behave import given, when, then
 
 @given('the user is on the login page')
 def given_user_on_login_page(context):
-    response = context.client.get('/login')
-    assert response.status_code == 200, "Couldn't reach login page."
+    context.response = context.client.get('/login')
+    assert context.response.status_code == 200, "Couldn't reach login page."
 
 
 @when('the user submits login form with valid credentials')
 def when_user_submits_valid_credentials(context):
     form_data = {'tradername': 'alex_t', 'password': 'Pass123%'}
-    response = context.client.post('/auth', data=form_data, follow_redirects=True)
-    assert response.status_code == 200, "Couldn't reach auth page."
+    context.response = context.client.post('/auth', data=form_data, follow_redirects=True)
+    assert context.response.status_code == 200, "Couldn't reach auth page."
 
 
 @when('the user submits login form with invalid credentials')
 def when_user_submits_invalid_credentials(context):
     form_data = {'tradername': 'alex_t', 'password': 'pass123%'}
-    response = context.client.post('/auth', data=form_data, follow_redirects=True)
-    assert response.status_code == 200, "Couldn't reach auth page."
+    context.response = context.client.post('/auth', data=form_data, follow_redirects=True)
+    assert context.response.status_code == 200, "Couldn't reach auth page."
 
 
 @when('the user submits login form with empty username and password')
 def when_user_submits_empty_credentials(context):
-    response = context.client.post('/auth', data={'tradername': '', 'password': ''}, follow_redirects=True)
-    assert response.status_code == 200, "Couldn't reach auth page."
+    context.response = context.client.post('/auth', data={'tradername': '', 'password': ''}, follow_redirects=True)
+    assert context.response.status_code == 200, "Couldn't reach auth page."
 
 
 @then('the user should be redirected to the dashboard')

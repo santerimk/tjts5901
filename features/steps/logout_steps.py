@@ -3,14 +3,14 @@ from behave import given, when, then
 
 @given('the user is logged in')
 def given_user_is_logged_in(context):
-    response = context.client.post('/auth', data={'tradername': 'alex_t', 'password': 'Pass123%'}, follow_redirects=True)
-    assert response.status_code == 200, "Failed to log in for the scenario."
+    context.response = context.client.post('/auth', data={'tradername': 'alex_t', 'password': 'Pass123%'}, follow_redirects=True)
+    assert context.response.status_code == 200, "Failed to log in for the scenario."
 
 
 @when('the user requests to log out')
 def when_user_requests_to_log_out(context):
-    response = context.client.get('/logout', follow_redirects=True)
-    assert response.status_code == 200, "Logout failed."
+    context.response = context.client.get('/logout', follow_redirects=True)
+    assert context.response.status_code == 200, "Logout failed."
 
 
 @then('the user should be redirected to the login page')

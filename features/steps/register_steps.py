@@ -3,7 +3,7 @@ from behave import given, when, then
 
 @given('the user is on the registration page')
 def given_user_on_registration_page(context):
-    response = context.client.get('/registry')
+    context.response = context.client.get('/registry')
     assert response.status_code == 200, "Couldn't reach registry page."
 
 
@@ -15,8 +15,8 @@ def when_user_submits_form_with_existing_username(context):
         'tradername': 'alex_t',
         'password': 'Pass123%'
     }
-    response = context.client.post('/register', data=form_data, follow_redirects=True)
-    assert response.status_code == 200, "Couldn't reach register."
+    context.response = context.client.post('/register', data=form_data, follow_redirects=True)
+    assert context.response.status_code == 200, "Couldn't reach register."
 
 
 @when('the user submits a registration form with valid data')
@@ -27,8 +27,8 @@ def when_user_submits_form_with_valid_data(context):
         'tradername': 'valid_user',
         'password': 'ValidPass123%'
     }
-    response = context.client.post('/register', data=form_data, follow_redirects=True)
-    assert response.status_code == 200, "Couldn't complete registration with valid data."
+    context.response = context.client.post('/register', data=form_data, follow_redirects=True)
+    assert context.response.status_code == 200, "Couldn't complete registration with valid data."
 
 
 @when('the user submits a registration form with invalid data')
@@ -39,8 +39,8 @@ def when_user_submits_form_with_invalid_data(context):
         'tradername': 'new_user',
         'password': 'Pass123%'
     }
-    response = context.client.post('/register', data=form_data, follow_redirects=True)
-    assert response.status_code == 200, "Couldn't reach register."
+    context.response = context.client.post('/register', data=form_data, follow_redirects=True)
+    assert context.response.status_code == 200, "Couldn't reach register."
 
 
 @then('the user should be registered successfully')
