@@ -50,7 +50,7 @@ def then_user_registered_successfully(context):
 
 @then('the user should see an error message about username uniqueness')
 def then_user_sees_username_uniqueness_error(context):
-    assert 'Please choose a different one.' in context.response.data.decode(), context.response.data #"Tradername error message wasn't displayed."
+    assert 'Please choose a different one.' in context.response.data.decode(), "Tradername error message wasn't displayed."
 
 
 @then('the user should see an error message about invalid data')

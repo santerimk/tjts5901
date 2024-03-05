@@ -27,10 +27,10 @@ class RegistryForm(PolyglotForm):
         """
         if not field.data or not field.data.strip():
             raise ValidationError("Tradername is required.")
-        trader_names = db.get_tradernames()
-        all_comparables = [comparable.strip().lower() for comparable, in trader_names]
+        existing_tradernames = db.get_tradernames()
+        existing_names = [trader['tradername'].strip().lower() for trader in existing_tradernames]
         tradername = field.data.strip().lower()
-        if tradername in all_comparables:
+        if tradername in existing_names:
             raise ValidationError(f'Tradername "{tradername.capitalize()}" already exists. Please choose a different one.')
 
     def check_complexity(self, field):
