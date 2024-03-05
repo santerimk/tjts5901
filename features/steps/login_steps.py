@@ -11,7 +11,7 @@ def given_user_on_login_page(context):
 def when_user_submits_valid_credentials(context):
     form_data = {'tradername': 'alex_t', 'password': 'Pass123%'}
     response = context.client.post('/auth', data=form_data, follow_redirects=True)
-    assert response.status_code == 200, "Couldn't reach auth page."
+    assert response.status_code == 200, response.data
 
 
 @when('the user submits login form with invalid credentials')
