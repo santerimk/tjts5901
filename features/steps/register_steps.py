@@ -4,7 +4,7 @@ from behave import given, when, then
 @given('the user is on the registration page')
 def given_user_on_registration_page(context):
     context.response = context.client.get('/registry')
-    assert response.status_code == 200, "Couldn't reach registry page."
+    assert context.response.status_code == 200, "Couldn't reach registry page."
 
 
 @when('the user submits a registration form with an existing username')
