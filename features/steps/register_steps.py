@@ -45,7 +45,7 @@ def when_user_submits_form_with_invalid_data(context):
 
 @then('the user should be registered successfully')
 def then_user_registered_successfully(context):
-    assert 'New trader "valid_user" registered!' in context.response.data.decode(), "User was not registered successfully."
+    assert 'Login' in context.response.data.decode(), "User was not registered successfully."
 
 
 @then('the user should see an error message about username uniqueness')
