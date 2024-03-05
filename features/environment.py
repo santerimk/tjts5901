@@ -7,9 +7,14 @@ import os
 csrf = None  # Initialize CSRFProtect as None initially
 
 
+def before_all(context):
+    os.environ['FLASK_ENV'] = 'testing'
+
+
 def before_scenario(context, scenario):
     context.client = app.test_client()
     context.client.testing = True
+
     global csrf
     if not os.environ.get('FLASK_ENV') == 'testing':  # Only enable CSRF protection if not in testing mode
         csrf = CSRFProtect(app)
