@@ -1,5 +1,4 @@
 from behave import given, when, then
-from flask import url_for, session
 
 
 @given('the user is logged in and on the order creation page')
@@ -47,7 +46,7 @@ def when_user_submits_invalid_order_details(context):
 
 @then('the order should be created with the user being redirected to the dashboard')
 def then_order_created_and_redirected_to_dashboard(context):
-    assert url_for('dashboard') in context.response.request.url, "User not redirected to dashboard."
+    assert 'Welcome' in context.response.request.url, "User not redirected to dashboard."
 
 
 @then('the user should see an error message regarding the invalid details')
