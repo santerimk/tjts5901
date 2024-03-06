@@ -11,7 +11,6 @@ def given_user_logged_in_and_on_order_creation_page(context):
 
 @when('the user submits the order creation form with valid details for an offer')
 def when_user_submits_valid_offer_details(context):
-    session['trader']['1']
     form_data = {
         'hidden': '1',
         'quantity': '100',
@@ -24,7 +23,6 @@ def when_user_submits_valid_offer_details(context):
 
 @when('the user submits the order creation form with valid details for a bid')
 def when_user_submits_valid_bid_details(context):
-    session['trader']['2']
     form_data = {
         'hidden': '2',
         'quantity': '50',
@@ -37,7 +35,6 @@ def when_user_submits_valid_bid_details(context):
 
 @when('the user submits the order creation form with invalid details')
 def when_user_submits_invalid_order_details(context):
-    session['trader']['1']
     form_data = {
         'hidden': '1',
         'quantity': '-10',
