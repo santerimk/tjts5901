@@ -45,7 +45,7 @@ def when_user_submits_invalid_order_details(context):
     assert context.response.status_code == 200, "Reaching order_place failed."
 
 
-@then('the order should be created successfully and the user should be redirected to the dashboard with a confirmation message')
+@then('the order should be created successfully')
 def then_order_created_and_redirected_with_message(context):
     assert context.response.status_code == 200, "Response status code is not 200."
     assert url_for('dashboard') in context.response.request.url, "User not redirected to dashboard."
