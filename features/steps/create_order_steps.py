@@ -5,7 +5,7 @@ from flask import url_for, session
 @given('the user is logged in and on the order creation page')
 def given_user_logged_in_and_on_order_creation_page(context):
     context.response = context.client.post('/auth', data={'tradername': 'alex_t', 'password': 'Pass123%'}, follow_redirects=True)
-    context.response = context.client.get('/order_create?stockid=1,order_type=Bid')
+    context.response = context.client.get('/order_create?stockid=1&order_type=Bid')
     assert context.response.status_code == 200, "Order creation page not reachable."
 
 

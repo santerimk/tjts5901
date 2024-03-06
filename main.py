@@ -166,7 +166,6 @@ def order_create():
         stockid = int(request.args.get('stockid'))
         order_type = request.args.get('order_type')
     except (TypeError, ValueError, AttributeError):
-        print(request.args.get("stockid"))
         flash("Could'n find the stock.", 'error')
         return redirect(url_for('dashboard'))
     stock = db.get_stock(stockid)
