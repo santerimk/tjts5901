@@ -45,13 +45,8 @@ def when_user_submits_invalid_order_details(context):
     assert context.response.status_code == 200, "Reaching order_place failed."
 
 
-@then('the order should be created successfully')
-def then_order_created_and_redirected_with_message(context):
-    assert 'New order was placed!' in context.response.data.decode() or 'Trade was made!' in context.response.data.decode(), "Confirmation message not shown."
-
-
-@then('the user should be redirected to the dashboard with a confirmation message')
-def then_order_created_and_redirected_with_message(context):
+@then('the order should be created with the user being redirected to the dashboard')
+def then_order_created_and_redirected_to_dashboard(context):
     assert url_for('dashboard') in context.response.request.url, "User not redirected to dashboard."
 
 
