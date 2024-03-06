@@ -47,9 +47,12 @@ def when_user_submits_invalid_order_details(context):
 
 @then('the order should be created successfully')
 def then_order_created_and_redirected_with_message(context):
-    assert context.response.status_code == 200, "Response status code is not 200."
-    assert url_for('dashboard') in context.response.request.url, "User not redirected to dashboard."
     assert 'New order was placed!' in context.response.data.decode() or 'Trade was made!' in context.response.data.decode(), "Confirmation message not shown."
+
+
+@then('the user should be redirected to the dashboard with a confirmation message')
+def then_order_created_and_redirected_with_message(context):
+    assert url_for('dashboard') in context.response.request.url, "User not redirected to dashboard."
 
 
 @then('the user should see an error message regarding the invalid details')

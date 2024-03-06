@@ -20,5 +20,5 @@ def then_user_redirected_to_login_page(context):
 
 @then('the user cannot access the dashboard page')
 def then_user_cannot_access_dashboard(context):
-    response = context.client.get('/dashboard', follow_redirects=True)
-    assert 'login' in response.data.decode().lower(), "User was able to access dashboard."
+    context.response = context.client.get('/dashboard', follow_redirects=True)
+    assert 'login' in context.response.data.decode().lower(), "User was able to access dashboard."
