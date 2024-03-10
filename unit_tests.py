@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch, MagicMock, ANY
 import stockmarket
 from stockmarket import add_trader, fetch_aapl_price, update_aapl_stock_price, hourly_update, get_tradernames, get_stocks, get_stock_bids, get_stock_offers, get_stock_bids_of_trader, get_stock_offers_of_trader, get_matching_bids, get_matching_offers, get_trades, get_trader, get_trader_info, get_trader_by_tradername, get_hashword_by_tradername, get_stock, get_order, add_order, add_trade, update_order, delete_order, requests
+from main import run_order_matching, build_trade_hierarchy
 from datetime import datetime
 
 def add(a, b):
@@ -707,6 +708,73 @@ class TestSpecificTools(unittest.TestCase):
         # Asserts
         self.assertEqual(expected_sql, actual_sql)
         self.assertEqual(actual_params, (orderid,))
+
+class TestOrderMatching(unittest.TestCase):
+
+    @patch('stockmarket.get_order')
+    @patch('stockmarket.get_matching_bids')
+    @patch('stockmarket.get_matching_offers')
+    @patch('stockmarket.add_trade')
+    @patch('stockmarket.update_order')
+    @patch('stockmarket.delete_order')
+    def test_no_matching_orders(self, mock_delete, mock_update, mock_add_trade, mock_matching_offers, mock_matching_bids, mock_get_order):
+        # Set up mock return values
+        mock_get_order.return_value = {'orderid': 1, 'traderid': 2, 'stockid': 3, 'price': 100, 'quantity': 10, 'selling': True}
+        mock_matching_bids.return_value = []
+        mock_matching_offers.return_value = []
+
+        # Run the function
+        result = run_order_matching(1)
+
+        # Assertions
+        self.assertFalse(result)
+        mock_add_trade.assert_not_called()
+        mock_update.assert_not_called()
+        mock_delete.assert_not_called()
+
+
+class TestBuildTradeHierarchy(unittest.TestCase):
+
+    @patch('stockmarket.get_trader')
+    @patch('stockmarket.get_stock')
+    @patch('stockmarket.get_trades')
+    def test_no_trades(self, mock_get_trades, mock_get_stock, mock_get_trader):
+        # Configure the mock to return an empty list for trades
+        mock_get_trades.return_value = []
+
+        result = build_trade_hierarchy()
+
+        self.assertEqual(result, [])
+        mock_get_stock.assert_not_called()
+        mock_get_trader.assert_not_called()
+
+    @patch('stockmarket.get_trader')
+    @patch('stockmarket.get_stock')
+    @patch('stockmarket.get_trades')
+    def test_with_trades(self, mock_get_trades, mock_get_stock, mock_get_trader):
+        # Configure the mocks dynamically
+        mock_get_trades.return_value = [{'tradeid': 1, 'stockid': 101, 'sellerid': 201, 'buyerid': 301}]
+        mock_get_stock.return_value = {'stockname': 'TechCo'}
+        mock_get_trader.side_effect = [{'tradername': 'Alice'}, {'tradername': 'Bob'}]
+
+        expected_result = [{
+            'tradeid': 1,
+            'stockid': 101,
+            'sellerid': 201,
+            'buyerid': 301,
+            'stockname': 'TechCo',
+            'sellername': 'Alice',
+            'buyername': 'Bob'
+        }]
+
+        result = build_trade_hierarchy()
+
+        self.assertEqual(result, expected_result)
+        mock_get_stock.assert_called_once_with(101)
+        # Ensure get_trader is called twice, once for the seller and once for the buyer
+        self.assertEqual(mock_get_trader.call_count, 2)
+        mock_get_trader.assert_any_call(201)
+        mock_get_trader.assert_any_call(301)
 
 
 if __name__ == '__main__':
