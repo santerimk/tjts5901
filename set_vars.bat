@@ -1,1 +1,5 @@
 set FLASK_APP=main.py
+set TEST_USERNAME1=alex_t
+set TEST_PASSWORD1=Pass123%
+set TEST_USERNAME2=mia_w
+set TEST_PASSWORD2=Pass456%

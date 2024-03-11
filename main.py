@@ -32,7 +32,7 @@ if __name__ == '__main__':
     """
     # THIS IS COMMENTED OUT SO THE API CALLS AREN'T SPAMMED CONSTANTLY
     # You can test by uncommenting it and it should retrieve the price 
-    #start_scheduler() 
+    start_scheduler() 
     app.run(host='127.0.0.1', port=8080, debug=True)
 
 
@@ -299,6 +299,8 @@ def build_offer_hierarchy():
         stocks = []
     for stock in stocks:
         offers = db.get_stock_offers(stock['stockid'])
+        if offers is None:
+            offers = []
         if not offers:
             continue
         for offer in offers:
@@ -317,6 +319,8 @@ def build_bid_hierarchy():
         stocks = []
     for stock in stocks:
         bids = db.get_stock_bids(stock['stockid'])
+        if bids is None:
+            bids = []
         for bid in bids:
             traderid = bid.pop('traderid')
             bid['buyer'] = db.get_trader_info(traderid)

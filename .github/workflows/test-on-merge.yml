@@ -25,3 +25,4 @@ jobs:
               run: |
                   pytest unit_tests.py
                   pytest test_app.py
+                  pytest test_e2e.py

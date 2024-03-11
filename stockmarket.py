@@ -151,7 +151,6 @@ def test_populate(): # TODO: Comment out once software complete.
         
     # Insert stocks
     stocks_data = [
-        ('Amazon', 3300.00, '2023-02-01 12:00:00'),
         ('Apple', 145.45, '2023-02-01 13:00:00'),
         ('Facebook', 275.00, '2023-02-01 10:00:00'),
         ('Netflix', 510.50, '2023-02-01 11:00:00'),
@@ -411,5 +410,4 @@ def delete_order(orderid):
         DELETE FROM orders
         WHERE orderid = ?
         """, (orderid,))
-
 

@@ -119,8 +119,8 @@ class CreateOrderForm(PolyglotForm):
         stock = db.get_stock(stockid)
         last_traded_price = stock['last_traded_price']
         print(type(last_traded_price))
-        min_limit = last_traded_price * 0.9
-        max_limit = last_traded_price * 1.1
+        min_limit = round(last_traded_price * 0.9, 1)
+        max_limit = round(last_traded_price * 1.1, 1)
         if not (min_limit <= value <= max_limit):
             print(type(last_traded_price))
             raise ValidationError(f"Price must be within 10% of the last traded price.")
