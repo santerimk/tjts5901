@@ -1,4 +1,4 @@
-name: Behaviour Driven Development
+name: Behaviour Driven Development tests
 
 on:
     push:

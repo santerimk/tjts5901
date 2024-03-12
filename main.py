@@ -14,11 +14,12 @@ app = Flask(__name__)
 app.secret_key = '!secret'
 csrf = CSRFProtect(app) # Add CSRF-protection (Cross-site request forgery) to the Flask-app.
 
-db.reset_and_populate() # TODO: Remove once done with testing the database.
+db.reset_and_populate() # COMMENT OUT IF NOT MOCK POPULATING DATABASE!
+
 
 def start_scheduler():
-    ''' Scheduler for updating the AAPL price hourly
-    '''
+    """Scheduler for updating the AAPL price hourly.
+    """
     print("Starting scheduler")
     scheduler = BackgroundScheduler()
     scheduler.add_job(stockmarket.hourly_update, 'interval', hours=1, next_run_time=datetime.now())
@@ -30,8 +31,6 @@ if __name__ == '__main__':
     """Boots the Flask-app environment.
     Configures the host, port and debug-mode.
     """
-    # THIS IS COMMENTED OUT SO THE API CALLS AREN'T SPAMMED CONSTANTLY
-    # You can test by uncommenting it and it should retrieve the price 
     start_scheduler() 
     app.run(host='127.0.0.1', port=8080, debug=True)
 

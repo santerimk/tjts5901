@@ -1,4 +1,4 @@
-name: Python package
+name: Unit and integration tests, and code quality report
 
 on:
     push:

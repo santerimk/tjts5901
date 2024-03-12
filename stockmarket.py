@@ -28,7 +28,7 @@ def initialize():
 
 
 # !!!USE ONLY IF YOU NEED TO RESET THE DATABASE TABLES AND REMOVE DATA!!!
-def reset_and_populate(): # TODO: Comment out once software complete.
+def reset_and_populate(): # USE ONLY FOR POPULATING WITH MOCK DATA.
     """For resetting the database, dropping all tables and their data,
     recreating them."""
     conn = get_connection()
@@ -76,7 +76,7 @@ def modify(query, args=()):
     conn.close()
     return id
 
-# TODO: Implement the means to update stock "last_traded_price" and "last_checked" values hourly with AAPL.
+
 def fetch_aapl_price():
     """Fetching the AAPL last traded price from the marketdata app API"""
     url = "https://api.marketdata.app/v1/stocks/quotes/AAPL/"
@@ -133,7 +133,7 @@ def hourly_update():
     print(f"Updated AAPL stock price to {price} at {datetime.now()}")
 
 
-def test_populate(): # TODO: Comment out once software complete.
+def test_populate(): # USE ONLY FOR POPULATING WITH MOCK DATA.
     """For test populating the database with mock data,
     only for development purposes.
     """
@@ -151,10 +151,9 @@ def test_populate(): # TODO: Comment out once software complete.
         
     # Insert stocks
     stocks_data = [
-        ('Apple', 145.45, '2023-02-01 13:00:00'),
-        ('Facebook', 275.00, '2023-02-01 10:00:00'),
-        ('Netflix', 510.50, '2023-02-01 11:00:00'),
-        ('Tesla', 720.30, '2023-02-01 09:00:00')
+        ('Apple', 172.75, '2024-12-03 15:00:00'),
+        ('Facebook', 483.59, '2024-12-03 15:00:00'),
+        ('Netflix', 600.93, '2024-12-03 15:00:00')
     ]
     for stock in stocks_data:
         modify("""
@@ -164,26 +163,18 @@ def test_populate(): # TODO: Comment out once software complete.
     
     # Insert orders
     orders_data = [
-        (1, 1, '2023-02-02 09:00:00', 5, 1, 725.00),
-        (2, 2, '2023-02-02 09:15:00', 10, 0, 270.00),
-        (3, 3, '2023-02-02 09:30:00', 2, 1, 515.00),
-        (1, 4, '2023-02-02 09:45:00', 1, 0, 3305.00),
-        (2, 5, '2023-02-02 10:00:00', 8, 1, 140.00),
-        (3, 1, '2023-02-02 10:15:00', 3, 0, 718.00),
-        (1, 2, '2023-02-02 10:30:00', 7, 1, 280.00),
-        (2, 3, '2023-02-02 10:45:00', 4, 0, 508.00),
-        (3, 4, '2023-02-02 11:00:00', 1, 1, 3310.00),
-        (1, 5, '2023-02-02 11:15:00', 5, 0, 147.00),
-        (2, 1, '2023-02-02 11:30:00', 6, 1, 723.00),
-        (3, 2, '2023-02-02 11:45:00', 9, 0, 277.00),
-        (1, 3, '2023-02-02 12:00:00', 3, 1, 512.00),
-        (2, 4, '2023-02-02 12:15:00', 2, 0, 3298.00),
-        (3, 5, '2023-02-02 12:30:00', 7, 1, 146.00),
-        (1, 1, '2023-02-02 12:45:00', 4, 0, 722.00),
-        (2, 2, '2023-02-02 13:00:00', 10, 1, 276.00),
-        (3, 3, '2023-02-02 13:15:00', 5, 0, 511.00),
-        (1, 4, '2023-02-02 13:30:00', 1, 1, 3302.00),
-        (2, 5, '2023-02-02 13:45:00', 8, 0, 143.50)
+        (3, 1, '2024-12-03 15:00:00', 5, 1, 176.45),
+        (3, 3, '2024-12-03 15:30:00', 2, 1, 633.20),
+        (2, 2, '2024-12-03 15:30:00', 7, 1, 505.89),
+        (1, 3, '2024-12-03 15:00:00', 3, 1, 625.50),
+        (1, 2, '2024-12-03 15:00:00', 10, 1, 509.00),
+        (3, 1, '2024-12-03 15:15:00', 3, 1, 180.00),
+        (2, 1, '2024-12-03 15:45:00', 4, 1, 177.05),
+
+        (3, 2, '2024-12-03 15:15:00', 10, 0, 501.00),
+        (2, 3, '2024-12-03 15:45:00', 4, 0, 619.95),
+        (1, 2, '2024-12-03 15:45:00', 9, 0, 499.00),
+        (2, 3, '2024-12-03 15:15:00', 5, 0, 615.00)
     ]
     for order in orders_data:
         modify("""
