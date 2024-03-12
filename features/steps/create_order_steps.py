@@ -14,7 +14,7 @@ def when_user_submits_valid_offer_details(context):
         'hidden': '1',
         'quantity': '100',
         'type': 'Offer',
-        'price': '3310.00'
+        'price': '478.00'
     }
     context.response = context.client.post('/order_place', data=form_data, follow_redirects=True)
     assert context.response.status_code == 200, "Reaching order_place failed."
