@@ -6,33 +6,20 @@ from tools import *
 
 from flask_wtf.csrf import CSRFProtect
 from datetime import datetime
-from apscheduler.schedulers.background import BackgroundScheduler
-import atexit
-import stockmarket
+
 
 app = Flask(__name__)
 app.secret_key = '!secret'
 csrf = CSRFProtect(app) # Add CSRF-protection (Cross-site request forgery) to the Flask-app.
 
 db.reset_and_populate() # COMMENT OUT IF NOT MOCK POPULATING DATABASE!
-
-
-def start_scheduler():
-    """Scheduler for updating the AAPL price hourly.
-    """
-    print("Starting scheduler")
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(stockmarket.hourly_update, 'interval', hours=1, next_run_time=datetime.now())
-    scheduler.start()
-    print("Scheduler started")
-    atexit.register(lambda: scheduler.shutdown())
+db.start_scheduler() 
 
 if __name__ == '__main__':
     """Boots the Flask-app environment.
     Configures the host, port and debug-mode.
     """
-    start_scheduler() 
-    app.run(host='127.0.0.1', port=8080, debug=True)
+    app.run(host='127.0.0.1', port=8080, debug=False)
 
 
 ########## REST ROUTE FUNCTIONS ##########

@@ -3,6 +3,8 @@ from tools import *
 import requests
 from apscheduler.schedulers.blocking import BlockingScheduler
 from datetime import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 
 DATABASE_NAME = "stockmarket.db"
 
@@ -27,8 +29,19 @@ def initialize():
     conn.close()
 
 
+def start_scheduler():
+    """Scheduler for updating the AAPL price hourly.
+    """
+    print("Starting scheduler")
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(hourly_update, 'interval', hours=1, next_run_time=datetime.now())
+    scheduler.start()
+    print("Scheduler started")
+    atexit.register(lambda: scheduler.shutdown())
+
+
 # !!!USE ONLY IF YOU NEED TO RESET THE DATABASE TABLES AND REMOVE DATA!!!
-def reset_and_populate(): # USE ONLY FOR POPULATING WITH MOCK DATA.
+def reset_and_populate(): # TODO: Comment out once software complete.
     """For resetting the database, dropping all tables and their data,
     recreating them."""
     conn = get_connection()
@@ -76,9 +89,10 @@ def modify(query, args=()):
     conn.close()
     return id
 
-
+# TODO: Implement the means to update stock "last_traded_price" and "last_checked" values hourly with AAPL.
 def fetch_aapl_price():
-    """Fetching the AAPL last traded price from the marketdata app API"""
+    """Fetching the AAPL last traded price from the marketdata app API
+    """
     url = "https://api.marketdata.app/v1/stocks/quotes/AAPL/"
     try:
         response = requests.get(url)
@@ -151,7 +165,7 @@ def test_populate(): # USE ONLY FOR POPULATING WITH MOCK DATA.
         
     # Insert stocks
     stocks_data = [
-        ('Apple', 172.75, '2024-12-03 15:00:00'),
+        ('Apple', 175.75, '2024-12-03 15:00:00'),
         ('Facebook', 483.59, '2024-12-03 15:00:00'),
         ('Netflix', 600.93, '2024-12-03 15:00:00')
     ]
