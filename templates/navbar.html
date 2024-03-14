@@ -1,0 +1,35 @@
+<!-- Navbar for navigating the Flask-app. -->
+<div class="flexnav">
+	<nav class="navbartop">
+		<ul>
+			<div class="navgroup-left">
+				<!-- Dashboard. -->
+				<li class="navobj">
+					<a href="{{url_for('dashboard')}}"
+						>{% if session['trader']['tradername'] %} {{
+						session['trader']['tradername'] }} {% else %} Dashboard
+						{% endif %}</a
+					>
+				</li>
+				<!-- Bids List. -->
+				<li class="navobj">
+					<a href="{{url_for('bid_listing')}}">Stock Bids</a>
+				</li>
+				<!-- Offers List. -->
+				<li class="navobj">
+					<a href="{{url_for('offer_listing')}}">Stock Offers</a>
+				</li>
+				<!-- Trades List. -->
+				<li class="navobj">
+					<a href="{{url_for('trade_listing')}}">Trades</a>
+				</li>
+			</div>
+			<div class="navgroup-right">
+				<!-- Logout link. -->
+				<li class="navobj">
+					<a href="{{url_for('logout')}}">Logout</a>
+				</li>
+			</div>
+		</ul>
+	</nav>
+</div>

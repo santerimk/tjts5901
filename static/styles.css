@@ -1,0 +1,306 @@
+body {
+	font-family: "helvetica", sans-serif;
+	text-align: center;
+}
+
+.navbartop {
+	/* Navbar positioning. */
+	background-color: green;
+	padding: 0.5em 0.5em;
+	margin-left: 0;
+	margin-top: 0;
+}
+
+.navbartop > ul {
+	/* Navbar design. */
+	display: flex;
+	justify-content: space-between;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+
+.navobj {
+	/* Navbar element design. */
+	margin-left: 0.5em;
+	padding-left: 0.5em;
+	font-size: 1.2em;
+	font-weight: bold;
+}
+
+.navgroup-left > .navobj:first-child {
+	/* Navbar element positioning. */
+	margin-left: 0;
+	padding-left: 0;
+}
+
+.navobj > a {
+	/* Navbar link design. */
+	color: white;
+	text-decoration: underline;
+}
+
+.navgroup-left {
+	/* Left side navbar object positioning. */
+	display: flex;
+	justify-content: flex-start;
+	margin-left: 0.5em;
+}
+
+.navgroup-right {
+	/* Right side navbar object positioning. */
+	display: flex;
+	justify-content: flex-end;
+	margin-right: 0.5em;
+}
+
+#login_background {
+	/* Setting background color for login pages. */
+	background: lightcyan;
+}
+
+#login-field {
+	/* Design and positioning for login field. */
+	background-color: white;
+	border: 1px solid silver;
+	width: 16em;
+	text-align: center;
+	margin: 0 auto;
+	padding-top: 0.5em;
+	padding-bottom: 0.5em;
+}
+
+#login-field > div {
+	/* Login form element specific positioning. */
+	margin-top: 1.2em;
+	margin-bottom: 1.2em;
+	margin-left: auto;
+	margin-right: auto;
+	width: 90%;
+	position: relative;
+}
+
+.login-input-label {
+	/* Input field labels above inputs. */
+	float: left;
+	clear: left;
+	margin-bottom: 0.1em;
+}
+
+#login-field input[type="text"],
+#login-field input[type="password"] {
+	/* Input field design. */
+	width: calc(100% - 0.2em);
+	padding: 0.1em;
+}
+
+#loginfield select {
+	/* Input field design. */
+	width: calc(100% + 0.1em);
+	padding: 0.1em;
+}
+
+#loginfield input[type="submit"] {
+	/* Submit button design. */
+	background: #0096f0;
+	color: White;
+	padding: 0.5em 1em 0.5em 1em;
+	margin-top: 0.4em;
+	font-size: 1.1em;
+}
+
+#notify {
+	/* For displaying flash notifications. */
+	margin: 5em;
+}
+
+.info1 {
+	/* Colors general info messages. */
+	color: darkorange;
+}
+
+.info2 {
+	/* Colors login info messages. */
+	color: darkgreen;
+	font-size: 0.8em;
+}
+
+.error1 {
+	/* Colors general error messages. */
+	color: red;
+}
+
+.error2 {
+	/* Colors and positions the input field error messages. */
+	color: red;
+	position: absolute;
+	text-align: left;
+	left: 22.5em;
+	right: -100%;
+	width: 30em;
+}
+
+.error3 {
+	/* Colors and positions the input field error messages. */
+	color: red;
+	position: absolute;
+	text-align: left;
+	left: 16.5em;
+	bottom: 0em;
+	right: -100%;
+	width: 30em;
+}
+
+#stock-listing {
+	/* Design for stock lists. */
+	list-style-type: none;
+	padding: 0;
+	margin: 0.5em;
+}
+
+#stock-listing > li {
+	/* Positioning for stock list elements. */
+	margin: 2em 0;
+	text-align: left;
+}
+
+#trade-listing {
+	/* Design for trade lists. */
+	padding: 0;
+	margin: 2em 0.5em;
+}
+
+.item-listing {
+	/* Design for order tables. */
+	table-layout: fixed;
+	width: 100%;
+	border: 1px solid black;
+	border-collapse: collapse;
+	margin-top: 0.5em;
+}
+
+.item-listing th,
+.item-listing td {
+	/* Design for order columns. */
+	border: 1px solid #888;
+	padding: 0.2em;
+}
+
+.item-listing tr {
+	/* Design for order rows. */
+	width: 100%;
+	text-align: left;
+}
+
+.heavy {
+	/* Heavy text design. */
+	font-size: 1.3em;
+	font-weight: bold;
+	margin-left: 0.1em;
+	margin-right: 0;
+}
+
+.light-heavy {
+	/* Light-heavy text design. */
+	font-size: 1.1em;
+	font-weight: bold;
+	margin: 1em 0 0.2em 0;
+}
+
+.custom-fieldset {
+	/* Custom design for fieldsets. */
+	width: 20em;
+	border: black 1px solid;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 2em;
+	padding-right: 2em;
+	padding-top: 2em;
+	padding-bottom: 1em;
+}
+
+.input-row {
+	/* Positioning and design for input rows. */
+	margin-top: 0.2em;
+	margin-bottom: 0.2em;
+	float: left;
+	clear: both;
+	position: relative;
+	width: 100%;
+}
+
+.input-label {
+	/* Positioning of input field labels. */
+	float: left;
+	font-weight: bold;
+}
+
+.input-field {
+	/* Positioning of generic input fields. */
+	float: right;
+	clear: right;
+}
+
+.numeric-input-field {
+	/* Positioning of numeric input fields. */
+	float: right;
+	clear: right;
+	width: 8em;
+}
+
+.radio-input-field {
+	/* Positioning and design for radio button lists. */
+	margin: 0;
+	float: right;
+	clear: right;
+	list-style: None;
+}
+
+.radio-input-field li {
+	/* Design for radiobutton labels. */
+	text-align: right;
+}
+
+.radio-input-field input {
+	/* Positioning for radio button checkboxes. */
+	float: right;
+	clear: right;
+}
+
+.submit {
+	/* Positioning and design for submit buttons. */
+	margin-left: auto;
+	margin-right: auto;
+	background: green;
+	color: White;
+	margin: 1em 0.3em 0 0.3em;
+	padding: 0.25em 0.9em 0.25em 0.9em;
+}
+
+.order-link {
+	/* Order link design. */
+	font-weight: bold;
+	margin-left: 0.3em;
+	margin-right: 1em;
+}
+
+.order-header {
+	/* Own orders header positioning. */
+	margin: 3em 0 1em 0;
+}
+
+#form-header-container {
+	/* Stock form header container positioning. */
+	margin: 3em 0 2em 0;
+}
+
+#form-header-container > h1 {
+	/* Stock form header positioning. */
+	margin: 0 0 0.2em 0;
+}
+
+.own_order_table {
+	/* Own order table design. */
+	list-style-type: none;
+	margin: 0;
+}

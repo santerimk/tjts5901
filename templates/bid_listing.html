@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Stock Bids</title>
+		<link
+			rel="stylesheet"
+			href="{{ url_for('static', filename='styles.css') }}"
+		/>
+	</head>
+	<body>
+		<!-- Add navigation bar to the page. -->
+		{% include 'navbar.html' %}
+
+		<!-- Page header. -->
+		<h1>Stock Bids</h1>
+
+		<!-- Bids information. -->
+		{% if bid_hierarchy %}
+		<ul id="stock-listing">
+			{% for stock in bid_hierarchy %}
+			<li>
+				<span class="heavy">{{ stock['stockname'] }}</span>
+				<a
+					class="order-link"
+					href="{{ url_for('order_create', stockid=stock['stockid'], order_type='Bid') }}"
+					>Order</a
+				>
+				<span>
+					(Last traded price: {{ stock['last_traded_price'] }} $)
+				</span>
+				<table class="item-listing">
+					<tr>
+						<th>Buyer</th>
+						<th>Price ($)</th>
+						<th>Quantity</th>
+						<th>Order Date</th>
+					</tr>
+					{% for bid in stock['bids'] %}
+					<tr>
+						<td>{{ bid['buyer']['tradername'] }}</td>
+						<td>{{ bid['price'] }}</td>
+						<td>{{ bid['quantity'] }}</td>
+						<td>{{ bid['order_date'] }}</td>
+					</tr>
+					{% else %}
+					<tr>
+						<td colspan="3">No bids available.</td>
+					</tr>
+					{% endfor %}
+				</table>
+			</li>
+			{% endfor %}
+		</ul>
+		{% else %}
+		<span>No stocks available.</span>
+		{% endif %}
+	</body>
+</html>

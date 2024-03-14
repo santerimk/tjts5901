@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Main</title>
+		<link
+			rel="stylesheet"
+			href="{{ url_for('static', filename='styles.css') }}"
+		/>
+	</head>
+	<body>
+		<!-- Add navigation bar to the page. -->
+		{% include 'navbar.html' %}
+
+		<p class="heavy">
+			Welcome, {{ trader['first_name'] }} {{ trader['last_name'] }}
+		</p>
+
+		<!-- Bids header. -->
+		<h2 class="order-header">Your Bids</h2>
+
+		<!-- Owned bids infromation. -->
+		<div>
+			{% for stock in owned_stock_bids %}
+			<div class="light-heavy">{{ stock['stockname'] }}</div>
+			<ul class="own_order_table">
+				{% for bid in stock['bids'] %}
+				<li>
+					<span
+						>Buying: {{ bid['price'] }} $ , Quantity: {{
+						bid['quantity'] }} , {{ bid['order_date'] }}</span
+					>
+					<a
+						class="order-link"
+						href="{{ url_for('order_modify', stockid=stock['stockid'], orderid=bid['orderid']) }}"
+						>Modify</a
+					>
+				</li>
+				{% endfor %}
+			</ul>
+			{% else %}
+			<div class="light-heavy">You haven't placed any bids.</div>
+			{% endfor %}
+		</div>
+
+		<!-- Offers header. -->
+		<h2 class="order-header">Your Offers</h2>
+
+		<!-- Owned offers infromation. -->
+		<div>
+			{% for stock in owned_stock_offers %}
+			<div class="light-heavy">{{ stock['stockname'] }}</div>
+			<ul class="own_order_table">
+				{% for offer in stock['offers'] %}
+				<li>
+					<span
+						>Selling: {{ offer['price'] }} $ , Quantity: {{
+						offer['quantity'] }} , {{ offer['order_date'] }}</span
+					>
+					<a
+						class="order-link"
+						href="{{ url_for('order_modify', stockid=stock['stockid'], orderid=offer['orderid']) }}"
+						>Modify</a
+					>
+				</li>
+				{% endfor %}
+			</ul>
+			{% else %}
+			<div class="light-heavy">You haven't placed any offers.</div>
+			{% endfor %}
+		</div>
+
+		<!-- Display possible info and error messages. -->
+		<div id="notify">
+			{% for message in get_flashed_messages(category_filter=['info']) %}
+			<div class="info1">{{message}}</div>
+			{% endfor %} {% for message in
+			get_flashed_messages(category_filter=['error']) %}
+			<div class="error1">{{message}}</div>
+			{% endfor %}
+		</div>
+	</body>
+</html>

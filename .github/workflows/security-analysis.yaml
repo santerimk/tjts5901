@@ -1,0 +1,37 @@
+name: Security Analysis
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    security_scan:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Set up Python
+              uses: actions/setup-python@v2
+              with:
+                  python-version: "3.11"
+
+            - name: Install Bandit
+              run: |
+                  pip install bandit
+
+            - name: Run Bandit security analysis
+              run: |
+                  bandit -r . -ll -f json -o bandit_report.json || true
+                  echo "## Bandit Security Analysis" >> $GITHUB_STEP_SUMMARY
+                  echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+                  cat bandit_report.json >> $GITHUB_STEP_SUMMARY
+                  echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+            - name: Upload Bandit report
+              uses: actions/upload-artifact@v2
+              with:
+                  name: bandit-report
+                  path: bandit_report.json

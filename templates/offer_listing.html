@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Stock Offers</title>
+		<link
+			rel="stylesheet"
+			href="{{ url_for('static', filename='styles.css') }}"
+		/>
+	</head>
+	<body>
+		<!-- Add navigation bar to the page. -->
+		{% include 'navbar.html' %}
+
+		<!-- Page header. -->
+		<h1>Stock Offers</h1>
+
+		<!-- Offers information. -->
+		{% if offer_hierarchy %}
+		<ul id="stock-listing">
+			{% for stock in offer_hierarchy %}
+			<li>
+				<span class="heavy">{{ stock['stockname'] }}</span>
+				<a
+					class="order-link"
+					href="{{ url_for('order_create', stockid=stock['stockid'], order_type='Offer') }}"
+					>Order</a
+				>
+				<span>
+					(Last traded price: {{ stock['last_traded_price'] }} $)
+				</span>
+				<table class="item-listing">
+					<tr>
+						<th>Seller</th>
+						<th>Price ($)</th>
+						<th>Quantity</th>
+						<th>Order Date</th>
+					</tr>
+					{% for offer in stock['offers'] %}
+					<tr>
+						<td>{{ offer['seller']['tradername'] }}</td>
+						<td>{{ offer['price'] }}</td>
+						<td>{{ offer['quantity'] }}</td>
+						<td>{{ offer['order_date'] }}</td>
+					</tr>
+					{% else %}
+					<tr>
+						<td colspan="3">No offers available.</td>
+					</tr>
+					{% endfor %}
+				</table>
+			</li>
+			{% endfor %}
+		</ul>
+		{% else %}
+		<span>No stocks available.</span>
+		{% endif %}
+
+		<!-- {% for stock in stocks %}
+        <button class="accordion">{{ stock.stockname }} - Last Traded Price: {{ stock.last_traded_price }}</button>
+        <div class="panel">
+            <p>Last Checked: {{ stock.last_checked }}</p>
+            <table>
+                <tr>
+                    <th>Order Date</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                </tr>
+                {% for order in stock.offers %}
+                <tr class="order-row">
+                    <td>{{ order.order_date }}</td>
+                    <td>{{ order.quantity }}</td>
+                    <td>{{ order.price }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3">No orders available</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% endfor %}
+
+        <script>
+            var acc = document.getElementsByClassName("accordion");
+            var i;
+
+            for (i = 0; i < acc.length; i++) {
+                acc[i].addEventListener("click", function() {
+                    this.classList.toggle("active");
+                    var panel = this.nextElementSibling;
+                    if (panel.style.display === "block") {
+                        panel.style.display = "none";
+                    } else {
+                        panel.style.display = "block";
+                    }
+                });
+            }
+        </script> -->
+	</body>
+</html>

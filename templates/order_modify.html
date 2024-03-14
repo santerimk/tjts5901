@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Modify Order</title>
+		<link
+			rel="stylesheet"
+			href="{{ url_for('static', filename='styles.css') }}"
+		/>
+	</head>
+	<body>
+		<!-- Add navigation bar to the page. -->
+		{% include 'navbar.html' %}
+
+		<!-- Page header. -->
+		<div id="form-header-container">
+			<h1>Modify '{{ stock['stockname'] }}' Order</h1>
+			<span
+				>(Last traded price for {{ stock['stockname'] }}: {{
+				stock['last_traded_price'] }} $)</span
+			>
+		</div>
+
+		<!-- Form for ordering stocks. -->
+		<form method="POST" action="{{ url_for('order_update') }}">
+			{{ form.csrf_token }} {{ form.hidden1 }} {{ form.hidden2 }}
+			<fieldset class="custom-fieldset">
+				<div class="input-row">
+					{{ form.type.label(class_="input-label", id="order-radios")
+					}} {{ form.type(class_="radio-input-field") }} {% for error
+					in form.type.errors %}
+					<span class="error2">{{ error|e }}</span>
+					{% endfor %}
+				</div>
+				<div class="input-row">
+					{{ form.price.label(class_="input-label", id="price-label")
+					}} {{ form.price(class_="numeric-input-field") }} {% for
+					error in form.price.errors %}
+					<span class="error2">{{ error|e }}</span>
+					{% endfor %}
+				</div>
+				<div class="input-row">
+					{{ form.quantity.label(class_="input-label") }} {{
+					form.quantity(class_="numeric-input-field") }} {% for error
+					in form.quantity.errors %}
+					<span class="error2">{{ error|e }}</span>
+					{% endfor %}
+				</div>
+				<div class="input-row">
+					{{form.delete.label(class_="input-label")}}
+					{{form.delete(class_="input-field")}}
+				</div>
+				<div class="input-row">
+					{{ form.order(class_="submit") }} {{
+					form.cancel(class_="submit") }}
+				</div>
+			</fieldset>
+		</form>
+
+		<!-- Dynamic Javascript logic for the price label. -->
+		<script src="{{ url_for('static', filename='order_logic.js') }}"></script>
+	</body>
+</html>

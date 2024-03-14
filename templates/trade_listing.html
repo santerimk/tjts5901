@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Trades</title>
+		<link
+			rel="stylesheet"
+			href="{{ url_for('static', filename='styles.css') }}"
+		/>
+	</head>
+	<body>
+		<!-- Add navigation bar to the page. -->
+		{% include 'navbar.html' %}
+
+		<!-- Page header. -->
+		<h1>Trades</h1>
+
+		<!-- Trade information. -->
+		<div id="trade-listing">
+			{% if trade_hierarchy %}
+			<table class="item-listing">
+				<tr>
+					<th>Traded Stock</th>
+					<th>Seller</th>
+					<th>Buyer</th>
+					<th>Trade Price ($)</th>
+					<th>Traded Quantity</th>
+					<th>Trade Date</th>
+				</tr>
+				{% for trade in trade_hierarchy %}
+				<tr>
+					<td>{{ trade['stockname'] }}</td>
+					<td>{{ trade['sellername'] }}</td>
+					<td>{{ trade['buyername'] }}</td>
+					<td>{{ trade['price'] }}</td>
+					<td>{{ trade['quantity'] }}</td>
+					<td>{{ trade['trade_date'] }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+			{% else %}
+			<span>No trades available.</span>
+			{% endif %}
+		</div>
+	</body>
+</html>

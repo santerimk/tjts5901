@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Login</title>
+		<link
+			rel="stylesheet"
+			href="{{ url_for('static', filename='styles.css') }}"
+		/>
+	</head>
+	<body id="login_background">
+		<!-- Page header. -->
+		<h1>Login</h1>
+
+		<!-- Add the login form for traders. -->
+		<form action="{{ url_for('auth') }}" method="POST">
+			{{ form.csrf_token }}
+
+			<fieldset id="login-field">
+				{% for message in get_flashed_messages(category_filter=['info'])
+				%}
+				<div class="info2">{{message}}</div>
+				{% endfor %}
+				<div>
+					<b class="login-input-label">{{ form.tradername.label }}</b>
+					{{ form.tradername }} {% for error in form.tradername.errors
+					%}
+					<span class="error3">{{ error|e }}</span>
+					{% endfor %}
+				</div>
+				<div>
+					<b class="login-input-label">{{ form.password.label }}</b>
+					{{ form.password }} {% for error in form.password.errors %}
+					<span class="error3">{{ error|e }}</span>
+					{% endfor %}
+				</div>
+				<div>{{ form.login(class_="submit") }}</div>
+				<div><a href="{{url_for('registry')}}">Register</a></div>
+			</fieldset>
+		</form>
+	</body>
+</html>

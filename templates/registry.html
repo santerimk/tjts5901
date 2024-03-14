@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Register</title>
+		<link
+			rel="stylesheet"
+			href="{{ url_for('static', filename='styles.css') }}"
+		/>
+	</head>
+	<body id="login_background">
+		<!-- Page header. -->
+		<h1>Register</h1>
+
+		<!-- Add the register form for traders. -->
+		<form action="{{ url_for('register') }}" method="POST">
+			{{ form.csrf_token }}
+			<fieldset id="login-field">
+				<div>
+					<b class="input-label">{{ form.first_name.label }}</b> {{
+					form.first_name }} {% for error in form.first_name.errors %}
+					<span class="error3">{{ error|e }}</span>
+					{% endfor %}
+				</div>
+				<div>
+					<b class="input-label">{{ form.last_name.label }}</b> {{
+					form.last_name }} {% for error in form.last_name.errors %}
+					<span class="error3">{{ error|e }}</span>
+					{% endfor %}
+				</div>
+				<div>
+					<b class="input-label">{{ form.tradername.label }}</b> {{
+					form.tradername }} {% for error in form.tradername.errors %}
+					<span class="error3">{{ error|e }}</span>
+					{% endfor %}
+				</div>
+				<div>
+					<b class="input-label">{{ form.password.label }}</b> {{
+					form.password }} {% for error in form.password.errors %}
+					<span class="error3">{{ error|e }}</span>
+					{% endfor %}
+				</div>
+				<div>
+					<b class="input-label">{{ form.password_confirm.label }}</b>
+					{{ form.password_confirm }} {% for error in
+					form.password_confirm.errors %}
+					<span class="error3">{{ error|e }}</span>
+					{% endfor %}
+				</div>
+				<div>
+					{{ form.register(class_="submit") }} {{
+					form.cancel(class_="submit") }}
+				</div>
+			</fieldset>
+		</form>
+	</body>
+</html>

@@ -1,0 +1,66 @@
+name: Code Coverage
+
+on:
+    push:
+        branches:
+            - main
+            - test
+
+jobs:
+    unit-tests:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Set up Python
+              uses: actions/setup-python@v2
+              with:
+                  python-version: "3.11"
+
+            - name: Install dependencies
+              run: pip install -r requirements.txt
+
+            - name: Run coverage and generate Markdown
+              run: |
+                  coverage run unit_tests.py
+                  coverage report -m > coverage_report.txt
+                  echo "## Coverage Summary" > $GITHUB_STEP_SUMMARY
+                  echo "| Name     | Stmts | Miss | Cover | Missing lines                                     |" >> $GITHUB_STEP_SUMMARY
+                  echo "|----------|-------|------|-------|---------------------------------------------------|" >> $GITHUB_STEP_SUMMARY
+                  awk 'NR>2 && !/^[- ]*$/ && !/^TOTAL/ {
+                      printf "| %-9s| %-6s| %-5s| %-6s| ", $1, $2, $3, $4; 
+                      missing=""; 
+                      for (i=5; i<=NF; i++) {
+                          if ($i ~ /^[0-9,-]+$/) {  
+                              if (missing != "" && substr(missing, length(missing)) != ",") missing = missing ", ";
+                              missing = missing $i;
+                          } else {
+                              if (missing != "" && substr(missing, length(missing)) != " ") missing = missing " ";
+                              missing = missing $i;
+                          }
+                      }
+                      missing = gensub(/,/, ", ", "g", missing);
+                      printf "%-49s|\n", missing
+                  }' coverage_report.txt >> $GITHUB_STEP_SUMMARY
+
+                  awk '/TOTAL/ && !/^[- ]*$/{
+                      printf "| %-9s| %-6s| %-5s| %-6s| ", $1, $2, $3, $4; 
+                      missing=""; 
+                      for (i=5; i<=NF; i++) {
+                          if ($i ~ /^[0-9-]+$/) {
+                              missing = (missing != "") ? missing ", " $i : $i;
+                          } else {
+                              missing = (missing != "") ? missing " " $i : $i;
+                          }
+                      }
+                      missing = gensub(/,/, ", ", "g", missing);
+                      printf "%-49s|\n", missing
+                  }' coverage_report.txt >> $GITHUB_STEP_SUMMARY
+
+            - name: Upload coverage table as artifact
+              uses: actions/upload-artifact@v2
+              with:
+                  name: coverage-table
+                  path: coverage_report.txt
